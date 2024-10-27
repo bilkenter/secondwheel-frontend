@@ -1,10 +1,11 @@
- "use client";
+"use client";
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { api } from '@/lib/apiClient';
 
 export default function SignupPage() {
   const [name, setName] = useState('');
@@ -13,27 +14,31 @@ export default function SignupPage() {
   const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      const response = await fetch('/api/signup', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name, email, password }),
+      const response = await api('users/signup/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, password }),
       });
 
-      if (!response.ok) {
-      throw new Error('Signup failed');
-      }
+      const responseData = await response.json();
+      console.log('Signup successful', responseData);
       router.push('/');
     } catch (error) {
       console.error('Error during signup:', error);
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+      } else {
+        console.error('An unknown error occurred');
+      }
     }
-    router.push('/');
   };
 
   return (
-    <div className="container mx-auto p-4 flex justify-center items-center min-h-screen">
+    <div className="container mx-auto p-4 flex justify-center items-center min-h-screen" suppressHydrationWarning>
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">Sign Up</CardTitle>

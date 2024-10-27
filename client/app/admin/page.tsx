@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
+import { api } from '@/lib/apiClient';
 interface User {
   id: number;
   name: string;
@@ -25,8 +25,8 @@ export default function AdminPage() {
   useEffect(() => {
     const fetchUsersAndAds = async () => {
       try {
-      const usersResponse = await fetch('/api/users');
-      const adsResponse = await fetch('/api/ads');
+      const usersResponse = await api('/users');
+      const adsResponse = await api('/ads');
       
       if (!usersResponse.ok || !adsResponse.ok) {
         throw new Error('Failed to fetch data');
@@ -50,7 +50,7 @@ export default function AdminPage() {
       user.id === userId ? { ...user, isModerator: true } : user
     );
     setUsers(updatedUsers);
-    fetch(`/api/users/${userId}/makeModerator`, {
+    api(`/users/${userId}/makeModerator`, {
       method: 'POST',
     }).then(response => {
       if (!response.ok) {
@@ -66,7 +66,7 @@ export default function AdminPage() {
       user.id === userId ? { ...user, isModerator: false } : user
     );
     setUsers(updatedUsers);
-    fetch(`/api/users/${userId}/removeModerator`, {
+    api(`/users/${userId}/removeModerator`, {
       method: 'POST',
     }).then(response => {
       if (!response.ok) {
@@ -81,7 +81,7 @@ export default function AdminPage() {
     const updatedUsers = users.filter(user => user.id !== userId);
     setUsers(updatedUsers);
 
-    fetch(`/api/users/${userId}/ban`, {
+    api(`/users/${userId}/ban`, {
       method: 'POST',
     }).then(response => {
       if (!response.ok) {
@@ -96,7 +96,7 @@ export default function AdminPage() {
     const updatedAds = ads.filter(ad => ad.id !== adId);
     setAds(updatedAds);
 
-    fetch(`/api/ads/${adId}`, {
+    api(`/ads/${adId}`, {
       method: 'DELETE',
     }).then(response => {
       if (!response.ok) {

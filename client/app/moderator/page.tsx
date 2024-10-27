@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
+import { api } from '@/lib/apiClient';
 interface Ad {
   id: number;
   title: string;
@@ -21,7 +21,7 @@ export default function ModeratorPage() {
   }, []);
 
   const handleApproveAd = (adId: number) => {
-    fetch(`/api/ads/${adId}/approve`, {
+    api(`/ads/${adId}/approve`, {
       method: 'POST',
     })
       .then(response => {
@@ -34,7 +34,7 @@ export default function ModeratorPage() {
   };
 
   const handleRejectAd = (adId: number) => {
-    fetch(`/api/ads/${adId}/reject`, {
+    api(`/ads/${adId}/reject`, {
       method: 'POST',
     })
       .then(response => {

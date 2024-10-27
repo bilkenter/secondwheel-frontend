@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
+import { api } from '@/lib/apiClient';
 interface Car {
   id: number;
   title: string;
@@ -25,13 +25,11 @@ export default function ProfilePage() {
   useEffect(() => {
     // Fetch user data and car listings
   const fetchUserData = async () => {
-    // Replace with your API endpoint
-    const userResponse = await fetch('/api/user');
+    const userResponse = await api('/user');
     const userData = await userResponse.json();
     setUser(userData);
 
-    // Replace with your API endpoint
-    const carsResponse = await fetch('/api/cars');
+    const carsResponse = await api('/cars');
     const carsData = await carsResponse.json();
     setCars(carsData);
   };

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert } from '@/components/ui/alert';
-
+import { api } from '@/lib/apiClient';
 export default function SigninPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
