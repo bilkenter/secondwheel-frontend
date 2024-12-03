@@ -1,39 +1,59 @@
 "use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { api } from '@/lib/apiClient';
+import { api } from "@/lib/apiClient";
+import { Alert } from "@/components/ui/alert";
 
 export default function SignupPage() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [userType, setUserType] = useState("");
+  const [notificationPreference, setNotificationPreference] = useState("");
+  const [iban, setIban] = useState("");
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    setAlertMessage(null);
+
     try {
-      const response = await api('users/signup/', {
-        method: 'POST',
+      const requestData = {
+        username,
+        email,
+        password,
+        phone,
+        userType,
+        notificationPreference,
+        iban: userType === "Seller" ? iban : null,
+      };
+
+      const response = await api("users/signup/", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify(requestData),
       });
 
-      const responseData = await response.json();
-      console.log('Signup successful', responseData);
-      router.push('/');
-    } catch (error) {
-      console.error('Error during signup:', error);
-      if (error instanceof Error) {
-        console.error('Error message:', error.message);
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Signup successful:", data);
+        router.push("/"); // Redirect after successful signup
       } else {
-        console.error('An unknown error occurred');
+        const errorData = await response.json();
+        console.error("Signup failed:", errorData);
+        setAlertMessage(errorData.message || "An error occurred during signup.");
       }
+    } catch (error) {
+      console.error("An error occurred during signup:", error);
+      setAlertMessage("An unexpected error occurred. Please try again.");
     }
   };
 
@@ -45,14 +65,18 @@ export default function SignupPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignup}>
+          {alertMessage && <Alert variant="destructive">{alertMessage}</Alert>}
+            {/* Name */}
             <Input
               type="text"
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="mb-4"
               required
             />
+
+            {/* Email */}
             <Input
               type="email"
               placeholder="Email"
@@ -61,15 +85,91 @@ export default function SignupPage() {
               className="mb-4"
               required
             />
+
+            {/* Password */}
             <Input
               type="password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mb-6"
+              className="mb-4"
               required
             />
-            <Button type="submit" className="w-full">Sign Up</Button>
+
+            {/* Phone */}
+            <Input
+              type="tel"
+              placeholder="Phone Number"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="mb-4"
+              required
+            />
+
+            {/* User Type Dropdown */}
+            <div className="mb-4">
+              <select
+                id="userType"
+                value={userType}
+                onChange={(e) => setUserType(e.target.value)}
+                className="w-full border rounded px-2 py-1 text-gray-500 focus:outline-none"
+                required
+              >
+                <option value="" disabled hidden>
+                  Select User Type
+                </option>
+                <option value="Buyer" className="text-gray-500">
+                  Buyer
+                </option>
+                <option value="Seller" className="text-gray-500">
+                  Seller
+                </option>
+                <option value="Admin" className="text-gray-500">
+                  Admin
+                </option>
+                <option value="Moderator" className="text-gray-500">
+                  Moderator
+                </option>
+              </select>
+            </div>
+
+            {/* IBAN Field (Visible for Seller only) */}
+            {userType === "Seller" && (
+              <Input
+                type="text"
+                placeholder="IBAN"
+                value={iban}
+                onChange={(e) => setIban(e.target.value)}
+                className="mb-4"
+                required
+              />
+            )}
+
+            {/* Notification Preference Dropdown */}
+            <div className="mb-6">
+              <select
+                id="notificationPreference"
+                value={notificationPreference}
+                onChange={(e) => setNotificationPreference(e.target.value)}
+                className="w-full border rounded px-2 py-1 text-gray-500 focus:outline-none"
+                required
+              >
+                <option value="" disabled hidden>
+                  Select Notification Preference
+                </option>
+                <option value="email" className="text-gray-500">
+                  Email
+                </option>
+                <option value="sms" className="text-gray-500">
+                  SMS
+                </option>
+              </select>
+            </div>
+
+            {/* Submit Button */}
+            <Button type="submit" className="w-full">
+              Sign Up
+            </Button>
           </form>
         </CardContent>
       </Card>
