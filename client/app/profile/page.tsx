@@ -5,93 +5,96 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from '@/lib/apiClient';
-interface Car {
+
+interface Vehicle {
   id: number;
   title: string;
+  vehicleType: string;
   price: number;
-  isSold: boolean;
+  status: string; // e.g., "Available" or "Sold"
 }
 
 interface User {
   name: string;
   email: string;
+  type: string; // "buyer" or "seller"
 }
 
 export default function ProfilePage() {
-  const [cars, setCars] = useState<Car[]>([]);
-  const [user, setUser] = useState<User>({ name: '', email: '' });
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [user, setUser] = useState<User>({ name: '', email: '', type: 'seller' });
   const [newPassword, setNewPassword] = useState('');
 
   useEffect(() => {
-    // Fetch user data and car listings
-  const fetchUserData = async () => {
-    const userResponse = await api('/user');
-    const userData = await userResponse.json();
-    setUser(userData);
+    const fetchUserData = async () => {
+      const userResponse = await api('/user');
+      const userData = await userResponse.json();
+      setUser(userData);
 
-    const carsResponse = await api('/cars');
-    const carsData = await carsResponse.json();
-    setCars(carsData);
-  };
+      if (userData.type === 'seller') {
+        const vehiclesResponse = await api('/vehicles');
+        const vehiclesData = await vehiclesResponse.json();
+        setVehicles(vehiclesData);
+      }
+    };
 
-  fetchUserData();
+    fetchUserData();
   }, []);
 
-  const handleAddCar = () => {
-    const newCar: Car = {
-      id: cars.length + 1, // backendde id logic gelistirilecek.
-      title: 'New Car', // inputtan gelen dynamic degerle degistirilcek.
-      price: 0, // inputtan gelen dynamic degerle degistirilcek.
-      isSold: false,
+  const handleAddVehicle = () => {
+    const newVehicle: Vehicle = {
+      id: vehicles.length + 1, // ID logic will be updated in the backend.
+      title: 'New Vehicle',    // Placeholder for input value.
+      vehicleType: 'Car',      // Placeholder for input value.
+      price: 0,                // Placeholder for input value.
+      status: 'Available',
     };
-    setCars([...cars, newCar]);
+    setVehicles([...vehicles, newVehicle]);
   };
 
-  const handleDeleteCar = (carId: number) => {
-    setCars(cars.filter(car => car.id !== carId));
+  const handleDeleteVehicle = (vehicleId: number) => {
+    setVehicles(vehicles.filter(vehicle => vehicle.id !== vehicleId));
   };
 
-  const handleUpdateUser = () => {
-    const updateUser = async () => {
+  const handleUpdateUser = async () => {
+    try {
       const response = await fetch('/api/user', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(user),
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(user),
       });
 
       if (response.ok) {
-      const updatedUser = await response.json();
-      setUser(updatedUser);
-      alert('User updated successfully');
+        const updatedUser = await response.json();
+        setUser(updatedUser);
+        alert('User updated successfully');
       } else {
-      alert('Failed to update user');
+        alert('Failed to update user');
       }
-    };
-
-    updateUser();
+    } catch (error) {
+      console.error('Error updating user:', error);
+      alert('An unexpected error occurred. Please try again.');
+    }
   };
 
-  const handleChangePassword = () => {
-    const changePassword = async () => {
+  const handleChangePassword = async () => {
+    try {
       const response = await fetch('/api/change-password', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ newPassword }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newPassword }),
       });
 
       if (response.ok) {
-      alert('Password changed successfully');
-      setNewPassword('');
+        alert('Password changed successfully');
+        setNewPassword('');
       } else {
-      alert('Failed to change password');
+        alert('Failed to change password');
       }
-    };
-
-    changePassword();
+    } catch (error) {
+      console.error('Error changing password:', error);
+      alert('An unexpected error occurred. Please try again.');
+    }
   };
 
   return (
@@ -105,13 +108,13 @@ export default function ProfilePage() {
         <CardContent>
           <Input 
             value={user.name} 
-            onChange={(e) => setUser({...user, name: e.target.value})}
+            onChange={(e) => setUser({ ...user, name: e.target.value })}
             placeholder="Name"
             className="mb-2"
           />
           <Input 
             value={user.email} 
-            onChange={(e) => setUser({...user, email: e.target.value})}
+            onChange={(e) => setUser({ ...user, email: e.target.value })}
             placeholder="Email"
             className="mb-2"
           />
@@ -127,29 +130,33 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Add New Car Listing</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Button onClick={handleAddCar}>Add New Car</Button>
-        </CardContent>
-      </Card>
+      {user.type === 'seller' && (
+        <>
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Add New Vehicle Listing</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={handleAddVehicle}>Add New Vehicle</Button>
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Car Listings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {cars.map((car) => (
-            <div key={car.id} className="flex justify-between items-center mb-2">
-              <span>{car.title} - ${car.price}</span>
-              <span>{car.isSold ? 'Sold' : 'Available'}</span>
-              <Button onClick={() => handleDeleteCar(car.id)}>Delete</Button>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Your Vehicle Listings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {vehicles.map((vehicle) => (
+                <div key={vehicle.id} className="flex justify-between items-center mb-2">
+                  <span>{vehicle.title} ({vehicle.vehicleType}) - ${vehicle.price}</span>
+                  <span>{vehicle.status}</span>
+                  <Button onClick={() => handleDeleteVehicle(vehicle.id)}>Delete</Button>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 }
