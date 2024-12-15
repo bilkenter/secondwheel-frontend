@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useRouter } from 'next/navigation';
 
 interface Car {
   id: number;
@@ -19,6 +20,7 @@ interface Car {
 export default function CarPage() {
   const { id } = useParams();
   const [car, setCar] = useState<Car | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchCarData = async () => {
@@ -64,7 +66,10 @@ export default function CarPage() {
             <p className="mb-2"><strong>Mileage:</strong> {car.mileage.toLocaleString()} miles</p>
             <p className="mb-2"><strong>Transmission:</strong> {car.transmission}</p>
             <p className="mb-4"><strong>Description:</strong> {car.description}</p>
-            <Button>Contact Seller</Button>
+            <div className="flex gap-2">
+              <Button onClick={() => router.push(`/car/${id}/buy`)}>Buy Now</Button>
+              <Button variant="outline">Contact Seller</Button>
+            </div>
           </CardContent>
         </Card>
       </div>

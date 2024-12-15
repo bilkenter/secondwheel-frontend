@@ -51,6 +51,16 @@ export default function Home() {
                 <option value="ford">Ford</option>
                 <option value="chevrolet">Chevrolet</option>
                 <option value="nissan">Nissan</option>
+                <option value="bmw">BMW</option>
+                <option value="mercedes">Mercedes</option>
+                <option value="audi">Audi</option>
+                <option value="volkswagen">Volkswagen</option>
+                <option value="hyundai">Hyundai</option>
+                <option value="kia">Kia</option>
+                <option value="lexus">Lexus</option>
+                <option value="porsche">Porsche</option>
+                <option value="subaru">Subaru</option>
+                <option value="volvo">Volvo</option>
               </select>
             </div>
             <div>
@@ -64,7 +74,7 @@ export default function Home() {
                   step="1000"
                   className="w-full"
                 />
-                <span id="priceDisplay" className="text-sm">$0 - $100,000</span>
+                <span id="priceDisplay" className="text-sm">0 - 999,999,999</span>
               </div>
             </div>
             <div>
