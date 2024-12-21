@@ -22,7 +22,7 @@ const Nav: React.FC = () => {
 
     checkAuth();
 
-    // Fake authentication check function
+    // TODOFake authentication check function
     const fakeAuthCheck = async () => {
       return new Promise<boolean>((resolve) => {
       setTimeout(() => {
@@ -31,7 +31,7 @@ const Nav: React.FC = () => {
       });
     };
 
-    // Fake fetch user initial function
+    // TODO: Fake fetch user initial function
     const fetchUserInitial = async () => {
       return new Promise<string>((resolve) => {
       setTimeout(() => {
@@ -91,8 +91,8 @@ const Nav: React.FC = () => {
             </li>
           ) : (
             <li>
-              <Link href="/signup" className="hover:text-gray-300">
-                Sign Up
+              <Link href="/signin" className="hover:text-gray-300">
+                Sign In
               </Link>
             </li>
           )}
