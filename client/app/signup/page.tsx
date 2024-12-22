@@ -12,10 +12,8 @@ export default function SignupPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState("");
   const [userType, setUserType] = useState("");
   const [notificationPreference, setNotificationPreference] = useState("");
-  const [iban, setIban] = useState("");
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const router = useRouter();
 
