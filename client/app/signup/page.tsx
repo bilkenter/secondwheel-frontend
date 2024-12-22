@@ -28,10 +28,8 @@ export default function SignupPage() {
         username,
         email,
         password,
-        //phone,
         userType,
         notificationPreference,
-        iban: userType === "Seller" ? iban : null,
       };
 
       const response = await fetch("http://127.0.0.1:8000/signup/", {
@@ -96,16 +94,6 @@ export default function SignupPage() {
               required
             />
 
-            {/* Phone */}
-            <Input
-              type="tel"
-              placeholder="Phone Number"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="mb-4"
-              required
-            />
-
             {/* User Type Dropdown */}
             <div className="mb-4">
               <select
@@ -132,18 +120,6 @@ export default function SignupPage() {
                 </option>
               </select>
             </div>
-
-            {/* IBAN Field (Visible for Seller only) */}
-            {userType === "Seller" && (
-              <Input
-                type="text"
-                placeholder="IBAN"
-                value={iban}
-                onChange={(e) => setIban(e.target.value)}
-                className="mb-4"
-                required
-              />
-            )}
 
             {/* Notification Preference Dropdown */}
             <div className="mb-6">
