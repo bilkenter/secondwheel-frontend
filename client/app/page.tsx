@@ -24,17 +24,21 @@ export default function Home() {
   useEffect(() => {
     const fetchCars = async () => {
       try {
-        const response = await fetch('/api/cars');
+        const response = await fetch("http://127.0.0.1:8000/get_all_cars/", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
         const data = await response.json();
-        setCars(data);
+        setCars(data.cars);
       } catch (error) {
-        console.error('Error fetching cars:', error);
+        console.error("Error fetching cars:", error);
       }
     };
 
     fetchCars();
   }, []);
-
   return (
     <main className="flex flex-col min-h-screen">
       <Nav />
