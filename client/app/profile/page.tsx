@@ -5,25 +5,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from '@/lib/apiClient';
+import { useRouter } from "next/navigation";
 
-interface Vehicle {
-  id: number;
-  title: string;
-  vehicleType: string;
+interface Ad {
+  ad_id: number;
   price: number;
-  status: string; // e.g., "Available" or "Sold"
+  posting_date: string;
+  status: string;  // e.g., "Available" or "Sold"
 }
 
 interface User {
   name: string;
   email: string;
-  type: string; // "buyer" or "seller"
+  type: string;  // "buyer" or "seller"
 }
 
 export default function ProfilePage() {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [user, setUser] = useState<User>({ name: '', email: '', type: 'seller' });
+  const [ads, setAds] = useState<Ad[]>([]);
+  const [user, setUser] = useState<User>({ name: '', email: '', type: 'seller' }); //type accordingly
   const [newPassword, setNewPassword] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -32,28 +33,28 @@ export default function ProfilePage() {
       setUser(userData);
 
       if (userData.type === 'seller') {
-        const vehiclesResponse = await api('/vehicles');
-        const vehiclesData = await vehiclesResponse.json();
-        setVehicles(vehiclesData);
+        const adsResponse = await api('/ads');  // Update API to fetch ads
+        const adsData = await adsResponse.json();
+        setAds(adsData);
       }
     };
 
     fetchUserData();
   }, []);
 
-  const handleAddVehicle = () => {
-    const newVehicle: Vehicle = {
-      id: vehicles.length + 1, // ID logic will be updated in the backend.
-      title: 'New Vehicle',    // Placeholder for input value.
-      vehicleType: 'Car',      // Placeholder for input value.
-      price: 0,                // Placeholder for input value.
+  const handleAddAd = () => {
+    router.push("/sell");
+    /*const newAd: Ad = {
+      ad_id: ads.length + 1, // ID logic will be updated in the backend
+      price: 0,              // Placeholder for input value
+      posting_date: new Date().toLocaleDateString(),  // Current date
       status: 'Available',
     };
-    setVehicles([...vehicles, newVehicle]);
+    setAds([...ads, newAd]);*/
   };
 
-  const handleDeleteVehicle = (vehicleId: number) => {
-    setVehicles(vehicles.filter(vehicle => vehicle.id !== vehicleId));
+  const handleDeleteAd = (ad_id: number) => {
+    setAds(ads.filter(ad => ad.ad_id !== ad_id));
   };
 
   const handleUpdateUser = async () => {
@@ -126,7 +127,7 @@ export default function ProfilePage() {
             className="mb-2"
           />
           <Button onClick={handleUpdateUser}>Update Profile</Button>
-          <Button onClick={handleChangePassword} className="ml-2">Change Password</Button>
+          <Button onClick={handleChangePassword} className="ml-2 mt-2">Change Password</Button>
         </CardContent>
       </Card>
 
@@ -134,23 +135,23 @@ export default function ProfilePage() {
         <>
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Add New Vehicle Listing</CardTitle>
+              <CardTitle>Add New Ad Listing</CardTitle>
             </CardHeader>
             <CardContent>
-              <Button onClick={handleAddVehicle}>Add New Vehicle</Button>
+              <Button onClick={handleAddAd}>Add New Ad</Button>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Your Vehicle Listings</CardTitle>
+              <CardTitle>Your Ad Listings</CardTitle>
             </CardHeader>
             <CardContent>
-              {vehicles.map((vehicle) => (
-                <div key={vehicle.id} className="flex justify-between items-center mb-2">
-                  <span>{vehicle.title} ({vehicle.vehicleType}) - ${vehicle.price}</span>
-                  <span>{vehicle.status}</span>
-                  <Button onClick={() => handleDeleteVehicle(vehicle.id)}>Delete</Button>
+              {ads.map((ad) => (
+                <div key={ad.ad_id} className="flex justify-between items-center mb-2">
+                  <span>{ad.posting_date} - ${ad.price}</span>
+                  <span>{ad.status}</span>
+                  <Button onClick={() => handleDeleteAd(ad.ad_id)}>Delete</Button>
                 </div>
               ))}
             </CardContent>
