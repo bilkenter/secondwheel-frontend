@@ -22,7 +22,7 @@ const Nav: React.FC = () => {
 
     checkAuth();
 
-    // TODOFake authentication check function
+    // Fake authentication check function
     const fakeAuthCheck = async () => {
       return new Promise<boolean>((resolve) => {
       setTimeout(() => {
@@ -31,7 +31,7 @@ const Nav: React.FC = () => {
       });
     };
 
-    // TODO: Fake fetch user initial function
+    // Fake fetch user initial function
     const fetchUserInitial = async () => {
       return new Promise<string>((resolve) => {
       setTimeout(() => {
@@ -46,9 +46,10 @@ const Nav: React.FC = () => {
   };
 
   return (
-    <nav className="bg-gray-800 text-white p-4">
-      <div className="container mx-auto flex justify-between items-center">
-        <Link href="/" className="text-xl font-bold">
+    <nav className="bg-[#365E84] text-white p-3 w-full">
+      <div className="container mx-auto flex items-center">
+      <img src="/icons/SecondWheelsIcon2.svg" alt="SecondWheels Logo" className="w-12 h-12"/>
+        <Link href="/" className="text-xl font-bold mr-80 ml-1">
           SecondWheels
         </Link>
         <button
@@ -91,8 +92,8 @@ const Nav: React.FC = () => {
             </li>
           ) : (
             <li>
-              <Link href="/signin" className="hover:text-gray-300">
-                Sign In
+              <Link href="/signup" className="hover:text-gray-300">
+                Sign Up
               </Link>
             </li>
           )}
