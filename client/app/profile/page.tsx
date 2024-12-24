@@ -100,8 +100,16 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Profile</h1>
-      
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Profile</h1>
+        <Button
+          onClick={() => router.push('/profile/offers')}
+          className="md:w-auto"
+        >
+          Manage Offers
+        </Button>
+      </div>
+
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>User Information</CardTitle>

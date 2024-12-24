@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Nav from "@/components/ui/nav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 
 interface Car {
   id: number;
@@ -20,6 +21,52 @@ interface Car {
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [cars, setCars] = useState<Car[]>([]);
+  const [minPrice, setMinPrice] = useState<string>('');
+  const [maxPrice, setMaxPrice] = useState<string>('');
+  const [priceError, setPriceError] = useState<string>('');
+  const [yearFrom, setYearFrom] = useState<string>('');
+  const [yearTo, setYearTo] = useState<string>('');
+  const [maxMileage, setMaxMileage] = useState<string>('');
+  const [yearError, setYearError] = useState<string>('');
+  const [comparingMode, setComparingMode] = useState(false);
+  const [selectedCars, setSelectedCars] = useState<Car[]>([]);
+  const router = useRouter();
+
+  const validatePriceRange = (min: string, max: string) => {
+    if (min && max && Number(min) > Number(max)) {
+      setPriceError('Minimum price cannot be greater than maximum price');
+    } else {
+      setPriceError('');
+    }
+  };
+
+  const validateYearRange = (from: string, to: string) => {
+    if (from && to && Number(from) > Number(to)) {
+      setYearError('Start year cannot be greater than end year');
+    } else {
+      setYearError('');
+    }
+  };
+
+  const handleCarSelect = (car: Car) => {
+    if (!comparingMode) return;
+
+    setSelectedCars(prev => {
+      if (prev.find(c => c.id === car.id)) {
+        return prev.filter(c => c.id !== car.id);
+      }
+      if (prev.length >= 2) {
+        return prev;
+      }
+      return [...prev, car];
+    });
+  };
+
+  const handleCompare = () => {
+    if (selectedCars.length === 2) {
+      router.push(`/compare?car1=${selectedCars[0].id}&car2=${selectedCars[1].id}`);
+    }
+  };
 
   useEffect(() => {
     const fetchCars = async () => {
@@ -71,15 +118,32 @@ export default function Home() {
               <label htmlFor="priceRange" className="block mb-2">Price Range</label>
               <div className="flex items-center space-x-2">
                 <Input
-                  type="range"
-                  id="priceRange"
+                  type="number"
+                  id="minPrice"
+                  placeholder="min TL"
                   min="0"
-                  max="100000"
-                  step="1000"
-                  className="w-full"
+                  value={minPrice}
+                  onChange={(e) => {
+                    setMinPrice(e.target.value);
+                    validatePriceRange(e.target.value, maxPrice);
+                  }}
+                  className={`w-1/2 ${priceError ? 'border-red-500' : ''}`}
                 />
-                <span id="priceDisplay" className="text-sm">0 - 999,999,999</span>
+                <span>-</span>
+                <Input
+                  type="number"
+                  id="maxPrice"
+                  placeholder="max TL"
+                  min="0"
+                  value={maxPrice}
+                  onChange={(e) => {
+                    setMaxPrice(e.target.value);
+                    validatePriceRange(minPrice, e.target.value);
+                  }}
+                  className={`w-1/2 ${priceError ? 'border-red-500' : ''}`}
+                />
               </div>
+              {priceError && <p className="text-red-500 text-sm mt-1">{priceError}</p>}
             </div>
             <div>
               <label htmlFor="year" className="block mb-2">Year</label>
@@ -90,7 +154,12 @@ export default function Home() {
                   placeholder="From"
                   min="1900"
                   max={new Date().getFullYear()}
-                  className="w-1/2"
+                  value={yearFrom}
+                  onChange={(e) => {
+                    setYearFrom(e.target.value);
+                    validateYearRange(e.target.value, yearTo);
+                  }}
+                  className={`w-1/2 ${yearError ? 'border-red-500' : ''}`}
                 />
                 <Input
                   type="number"
@@ -98,9 +167,15 @@ export default function Home() {
                   placeholder="To"
                   min="1900"
                   max={new Date().getFullYear()}
-                  className="w-1/2"
+                  value={yearTo}
+                  onChange={(e) => {
+                    setYearTo(e.target.value);
+                    validateYearRange(yearFrom, e.target.value);
+                  }}
+                  className={`w-1/2 ${yearError ? 'border-red-500' : ''}`}
                 />
               </div>
+              {yearError && <p className="text-red-500 text-sm mt-1">{yearError}</p>}
             </div>
             <div>
               <label htmlFor="mileage" className="block mb-2">Mileage</label>
@@ -109,6 +184,8 @@ export default function Home() {
                 id="mileage"
                 placeholder="Max mileage"
                 min="0"
+                value={maxMileage}
+                onChange={(e) => setMaxMileage(e.target.value)}
                 className="w-full"
               />
             </div>
@@ -117,37 +194,69 @@ export default function Home() {
         </aside>
 
         <div className="flex-1 p-8">
-          {/* Search bar */}
-          <div className="mb-8">
+          <div className="mb-8 flex justify-between items-center">
             <Input
               type="text"
               placeholder="Search for cars..."
               value={searchTerm}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-              className="w-full"
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full mr-4"
             />
+            <Button
+              onClick={() => {
+                setComparingMode(!comparingMode);
+                setSelectedCars([]);
+              }}
+              variant={comparingMode ? "destructive" : "default"}
+            >
+              {comparingMode ? "Cancel Compare" : "Compare Cars"}
+            </Button>
+            {comparingMode && (
+              <Button
+                onClick={handleCompare}
+                disabled={selectedCars.length !== 2}
+                className="ml-2"
+              >
+                Compare Selected ({selectedCars.length}/2)
+              </Button>
+            )}
           </div>
 
           {/* Car listings */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {cars.map((car) => (
-              <Card key={car.id} className="overflow-hidden">
-                <img src={car.image} alt={car.title} className="w-full h-48 object-cover" />
-                <CardHeader>
-                  <CardTitle>{car.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600 mb-2">{car.description}</p>
-                  <div className="flex justify-between items-center">
-                    <p className="font-bold text-lg">${car.price.toLocaleString()}</p>
-                    <span className="text-sm text-gray-500">{car.year}</span>
+              <div
+                key={car.id}
+                onClick={() => comparingMode ? handleCarSelect(car) : router.push(`/car/${car.id}`)}
+                className={`cursor-pointer transition-transform hover:scale-105 relative ${
+                  comparingMode && selectedCars.find(c => c.id === car.id)
+                    ? 'ring-2 ring-blue-500'
+                    : ''
+                }`}
+              >
+                {comparingMode && selectedCars.find(c => c.id === car.id) && (
+                  <div className="absolute top-2 right-2 z-10 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
+                    ✓
                   </div>
-                  <div className="mt-2 text-sm text-gray-600">
-                    <span className="mr-4">{car.mileage.toLocaleString()} miles</span>
-                    <span>{car.transmission}</span>
-                  </div>
-                </CardContent>
-              </Card>
+                )}
+                <Card className="overflow-hidden">
+                  <img src={car.image} alt={car.title} className="w-full h-48 object-cover" />
+                  <CardHeader>
+                    <CardTitle>{car.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 mb-2">{car.description}</p>
+                    <div className="flex justify-between items-center">
+                      <p className="font-bold text-lg">${car.price.toLocaleString()}</p>
+                      <span className="text-sm text-gray-500">{car.year}</span>
+                    </div>
+                    <div className="mt-2 text-sm text-gray-600">
+                      <span className="mr-4">{car.mileage.toLocaleString()} miles</span>
+                      <span>{car.transmission}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             ))}
           </div>
         </div>

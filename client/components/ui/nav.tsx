@@ -60,23 +60,23 @@ const Nav: React.FC = () => {
         </button>
         <ul className={`flex-col md:flex-row md:flex space-x-20 ${isMobileMenuOpen ? 'flex' : 'hidden'} md:flex`}>
           <li>
-            <Link href="/buy" className="hover:text-gray-300">
-              Buy Vehicles
+            <Link href="/" className="hover:text-gray-300">
+              Buy
             </Link>
           </li>
           <li>
             <Link href="/sell" className="hover:text-gray-300">
-              Sell Your Vehicle
+              Sell
             </Link>
           </li>
           <li>
             <Link href="/listings" className="hover:text-gray-300">
-              Browse Listings
+              Browse
             </Link>
           </li>
           <li>
             <Link href="/about" className="hover:text-gray-300">
-              About Us
+              About
             </Link>
           </li>
           <li>
