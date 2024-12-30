@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { Button } from "@/components/ui/button";
 
 const Nav: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -58,7 +59,7 @@ const Nav: React.FC = () => {
         >
           ☰
         </button>
-        <ul className={`flex-col md:flex-row md:flex space-x-20 ${isMobileMenuOpen ? 'flex' : 'hidden'} md:flex`}>
+        <ul className={`flex-col md:flex-row md:flex space-x-20 ${isMobileMenuOpen ? 'flex' : 'hidden'} md:flex items-center`}>
           <li>
             <Link href="/" className="hover:text-gray-300">
               Buy
@@ -86,14 +87,21 @@ const Nav: React.FC = () => {
           </li>
           {isAuthenticated ? (
             <li>
-              <Link href="/profile" className="hover:text-gray-300">
-                {userInitial}
+              <Link href="/profile">
+                <div className="bg-white text-[#365E84] rounded-full w-8 h-8 flex items-center justify-center font-semibold hover:bg-gray-200 transition-colors">
+                  {userInitial}
+                </div>
               </Link>
             </li>
           ) : (
             <li>
-              <Link href="/signup" className="hover:text-gray-300">
-                Sign Up
+              <Link href="/signin">
+                <Button 
+                  variant="outline" 
+                  className="bg-white text-[#365E84] hover:bg-gray-200 font-semibold"
+                >
+                  Sign In
+                </Button>
               </Link>
             </li>
           )}
