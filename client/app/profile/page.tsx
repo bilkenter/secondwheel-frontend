@@ -25,6 +25,7 @@ export default function ProfilePage() {
   const [ads, setAds] = useState<Ad[]>([]);
   const [user, setUser] = useState<User>({ name: '', email: '', type: 'seller', user_id: 0 });
   const [newPassword, setNewPassword] = useState('');
+  const [balance, setBalance] = useState(0);
   const router = useRouter();
 
   // Fetch user data and ads
@@ -44,6 +45,7 @@ export default function ProfilePage() {
           if (userResponse.ok) {
             const userData = await userResponse.json();
             setUser({ ...user, ...userData.user }); // Update user state with fetched data
+            setBalance(userData.user.balance || 0);
             console.log("User Data:", userData);
           } else {
             console.log("Error fetching user data:", userResponse);
@@ -170,6 +172,15 @@ export default function ProfilePage() {
           />
           <Button onClick={handleUpdateUser}>Update Profile</Button>
           <Button onClick={handleChangePassword} className="ml-2 mt-2">Change Password</Button>
+        </CardContent>
+      </Card>
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Your Balance</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>${balance.toFixed(2)}</p>
         </CardContent>
       </Card>
 
