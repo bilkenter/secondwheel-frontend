@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 
 interface Car {
-  id: number;
+  ad_id: number;  // changed to ad_id
   title: string;
   description: string;
   price: number;
@@ -52,8 +52,8 @@ export default function Home() {
     if (!comparingMode) return;
 
     setSelectedCars(prev => {
-      if (prev.find(c => c.id === car.id)) {
-        return prev.filter(c => c.id !== car.id);
+      if (prev.find(c => c.ad_id === car.ad_id)) {
+        return prev.filter(c => c.ad_id !== car.ad_id);
       }
       if (prev.length >= 2) {
         return prev;
@@ -64,7 +64,7 @@ export default function Home() {
 
   const handleCompare = () => {
     if (selectedCars.length === 2) {
-      router.push(`/compare?car1=${selectedCars[0].id}&car2=${selectedCars[1].id}`);
+      router.push(`/compare?ad1=${selectedCars[0].ad_id}&ad2=${selectedCars[1].ad_id}`);
     }
   };
 
@@ -192,7 +192,6 @@ export default function Home() {
             <Button className="w-full">Apply Filters</Button>
           </div>
         </aside>
-
         <div className="flex-1 p-8">
           <div className="mb-8 flex justify-between items-center">
             <Input
@@ -227,14 +226,15 @@ export default function Home() {
             {cars.length > 0 ? (
               cars.map((car) => (
                 <div
-                  key={car.id}
-                  onClick={() => comparingMode ? handleCarSelect(car) : router.push(`/car/${car.id}`)}
-                  className={`cursor-pointer transition-transform hover:scale-105 relative ${comparingMode && selectedCars.find(c => c.id === car.id)
+                  key={car.ad_id}
+                  onClick={() => comparingMode ? handleCarSelect(car) : router.push(`/car/${car.ad_id}`)} // Use ad_id here for routing
+
+                  className={`cursor-pointer transition-transform hover:scale-105 relative ${comparingMode && selectedCars.find(c => c.ad_id === car.ad_id)
                     ? 'ring-2 ring-blue-500'
                     : ''
                     }`}
                 >
-                  {comparingMode && selectedCars.find(c => c.id === car.id) && (
+                  {comparingMode && selectedCars.find(c => c.ad_id === car.ad_id) && (
                     <div className="absolute top-2 right-2 z-10 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
                       ✓
                     </div>
@@ -266,6 +266,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-    </main >
+    </main>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import React, { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,18 +9,20 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface Car {
-  id: number;
+  ad_id: number;
   title: string;
   price: number;
 }
 
 interface User {
   credits: number;
+  user_type: string;  // Add user_type here
+  user_id: number;    // Ensure user_id is available
 }
 
 export default function BuyCarPage() {
-  const { id } = useParams();
   const router = useRouter();
+  const { ad_id } = router.query;
   const [car, setCar] = useState<Car | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
@@ -30,16 +32,21 @@ export default function BuyCarPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        
         // Fetch car data
-        const carResponse = await fetch(`/api/cars/${id}`);
+        const carResponse = await fetch(`http://127.0.0.1:8000/cars/${ad_id}/`);
         const carData = await carResponse.json();
         setCar(carData);
 
-        // Fetch user data (including credits)
-        const userResponse = await fetch('/api/user');
+        // Fetch user data (including credits and user type)
+        const storedUserId = localStorage.getItem("user_id");
+        if (!storedUserId) {
+          setError("User not logged in.");
+          return;
+        }
+
+        const userResponse = await fetch(`http://127.0.0.1:8000/get_user_data?user_id=${storedUserId}`);
         const userData = await userResponse.json();
-        setUser(userData);
+        setUser(userData.user);
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to load necessary data");
@@ -47,13 +54,21 @@ export default function BuyCarPage() {
     };
 
     fetchData();
-  }, [id]);
+  }, [ad_id]);
+
 
   const handlePurchase = async () => {
     if (!car || !user) return;
 
     setLoading(true);
     setError(null);
+
+    // Check if the user is a seller
+    if (user.user_type !== "Seller") {
+      setError("You must be a seller to purchase this car.");
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch('/api/purchase', {
@@ -64,6 +79,7 @@ export default function BuyCarPage() {
         body: JSON.stringify({
           carId: car.id,
           price: car.price,
+          userId: user.user_id,
         }),
       });
 
@@ -103,7 +119,7 @@ export default function BuyCarPage() {
                 <Label>Car</Label>
                 <p className="text-lg font-medium">{car.title}</p>
               </div>
-              
+
               <div>
                 <Label>Price</Label>
                 <p className="text-lg font-medium">${car.price.toLocaleString()}</p>
