@@ -16,7 +16,7 @@ interface Car {
   mileage: number;
   transmission: string;
   images: string[];  // Keep the images property but don't use it yet
-  user_id: number;
+  user_id: number | null; // user_id can now be null if not available
 }
 
 export default function CarPage() {
@@ -41,6 +41,9 @@ export default function CarPage() {
   }, [ad_id]); // Run this useEffect only when ad_id changes
 
   if (!car) return <div>Loading...</div>;
+
+  // Ensure user_id exists and is properly converted to string
+  const sellerId = car.user_id ? car.user_id.toString() : '';
 
   return (
     <div className="container mx-auto p-4">
@@ -80,7 +83,7 @@ export default function CarPage() {
           isOpen={isChatOpen}
           onClose={() => setIsChatOpen(false)}
           carId={car.ad_id.toString()}
-          sellerId={car.user_id.toString()}
+          sellerId={sellerId}
           currentUserId={localStorage.getItem("user_id") || ''}
           carTitle={car.title}
         />

@@ -21,9 +21,9 @@ interface User {
 }
 
 export default function BuyCarPage() {
-  const router = useRouter();
-  const { ad_id } = router.query;
+  const { ad_id } = useParams();  // Capture ad_id from URL
   const [car, setCar] = useState<Car | null>(null);
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +33,7 @@ export default function BuyCarPage() {
     const fetchData = async () => {
       try {
         // Fetch car data
-        const carResponse = await fetch(`http://127.0.0.1:8000/cars/${ad_id}/`);
+        const carResponse = await fetch(`http://127.0.0.1:8000/car/${ad_id}/`);
         const carData = await carResponse.json();
         setCar(carData);
 
@@ -122,18 +122,18 @@ export default function BuyCarPage() {
 
               <div>
                 <Label>Price</Label>
-                <p className="text-lg font-medium">${car.price.toLocaleString()}</p>
+                <p className="text-lg font-medium">${car.price}</p>
               </div>
 
               <div>
                 <Label>Your Credits</Label>
-                <p className="text-lg font-medium">${user.credits.toLocaleString()}</p>
+                <p className="text-lg font-medium">${user.credits}</p>
               </div>
 
               <div>
                 <Label>Remaining Credits After Purchase</Label>
                 <p className="text-lg font-medium">
-                  ${(user.credits - car.price).toLocaleString()}
+                  ${(user.credits - car.price)}
                 </p>
               </div>
 
