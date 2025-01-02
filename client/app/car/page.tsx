@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
+import ChatModal from '@/components/Chat/ChatModal';
 
 interface Car {
   id: number;
@@ -15,12 +16,14 @@ interface Car {
   mileage: number;
   transmission: string;
   images: string[];
+  sellerId: string;
 }
 
 export default function CarPage() {
   const { id } = useParams();
   const [car, setCar] = useState<Car | null>(null);
   const router = useRouter();
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
     const fetchCarData = async () => {
@@ -68,11 +71,29 @@ export default function CarPage() {
             <p className="mb-4"><strong>Description:</strong> {car.description}</p>
             <div className="flex gap-2">
               <Button onClick={() => router.push(`/car/${id}/buy`)}>Buy Now</Button>
-              <Button variant="outline">Contact Seller</Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsChatOpen(true)}
+              >
+                Chat with Seller
+              </Button>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {car && (
+        <ChatModal
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+          carId={car.id.toString()}
+          sellerId={car.sellerId}
+
+          //TODO: get current user id
+          //currentUserId={currentUserId}
+          carTitle={car.title}
+        />
+      )}
     </div>
   );
 }

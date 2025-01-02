@@ -30,6 +30,7 @@ export default function BuyCarPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        
         // Fetch car data
         const carResponse = await fetch(`/api/cars/${id}`);
         const carData = await carResponse.json();
