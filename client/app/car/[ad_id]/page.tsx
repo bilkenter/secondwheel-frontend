@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
+import ChatModal from "@/components/Chat/ChatModal";
 
 interface Car {
   ad_id: number;
@@ -22,6 +23,7 @@ export default function CarPage() {
   const { ad_id } = useParams();  // Capture ad_id from URL
   const [car, setCar] = useState<Car | null>(null);
   const router = useRouter();
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
     const fetchCarData = async () => {
@@ -67,7 +69,7 @@ export default function CarPage() {
             <p className="mb-4"><strong>Description:</strong> {car.description}</p>
             <div className="flex gap-2">
               <Button onClick={() => router.push(`/car/${ad_id}/buy`)}>Buy Now</Button>
-              <Button variant="outline">Contact Seller</Button>
+              <Button variant="outline" onClick={() => setIsChatOpen(true)}>Contact Seller</Button>
             </div>
           </CardContent>
         </Card>
@@ -77,8 +79,8 @@ export default function CarPage() {
         <ChatModal
           isOpen={isChatOpen}
           onClose={() => setIsChatOpen(false)}
-          ad_id={car.ad_id.toString()}
-          sellerId={car.user_id}
+          carId={car.ad_id.toString()}
+          sellerId={car.user_id.toString()}
           currentUserId={localStorage.getItem("user_id") || ''}
           carTitle={car.title}
         />
