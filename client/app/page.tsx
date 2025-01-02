@@ -224,43 +224,48 @@ export default function Home() {
 
           {/* Car listings */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {cars.map((car) => (
-              <div
-                key={car.id}
-                onClick={() => comparingMode ? handleCarSelect(car) : router.push(`/car/${car.id}`)}
-                className={`cursor-pointer transition-transform hover:scale-105 relative ${
-                  comparingMode && selectedCars.find(c => c.id === car.id)
+            {cars.length > 0 ? (
+              cars.map((car) => (
+                <div
+                  key={car.id}
+                  onClick={() => comparingMode ? handleCarSelect(car) : router.push(`/car/${car.id}`)}
+                  className={`cursor-pointer transition-transform hover:scale-105 relative ${comparingMode && selectedCars.find(c => c.id === car.id)
                     ? 'ring-2 ring-blue-500'
                     : ''
-                }`}
-              >
-                {comparingMode && selectedCars.find(c => c.id === car.id) && (
-                  <div className="absolute top-2 right-2 z-10 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
-                    ✓
-                  </div>
-                )}
-                <Card className="overflow-hidden">
-                  <img src={car.image} alt={car.title} className="w-full h-48 object-cover" />
-                  <CardHeader>
-                    <CardTitle>{car.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-600 mb-2">{car.description}</p>
-                    <div className="flex justify-between items-center">
-                      <p className="font-bold text-lg">${car.price.toLocaleString()}</p>
-                      <span className="text-sm text-gray-500">{car.year}</span>
+                    }`}
+                >
+                  {comparingMode && selectedCars.find(c => c.id === car.id) && (
+                    <div className="absolute top-2 right-2 z-10 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
+                      ✓
                     </div>
-                    <div className="mt-2 text-sm text-gray-600">
-                      <span className="mr-4">{car.mileage.toLocaleString()} miles</span>
-                      <span>{car.transmission}</span>
-                    </div>
-                  </CardContent>
-                </Card>
+                  )}
+                  <Card className="overflow-hidden">
+                    <img src={car.image} alt={car.title} className="w-full h-48 object-cover" />
+                    <CardHeader>
+                      <CardTitle>{car.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-600 mb-2">{car.description}</p>
+                      <div className="flex justify-between items-center">
+                        <p className="font-bold text-lg">${car.price.toLocaleString()}</p>
+                        <span className="text-sm text-gray-500">{car.year}</span>
+                      </div>
+                      <div className="mt-2 text-sm text-gray-600">
+                        <span className="mr-4">{car.mileage.toLocaleString()} miles</span>
+                        <span>{car.transmission}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-3 text-center text-gray-500">
+                No cars found that match the filters.
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
-    </main>
+    </main >
   );
 }
