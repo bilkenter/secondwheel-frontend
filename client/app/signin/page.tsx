@@ -30,7 +30,10 @@ export default function SigninPage() {
       if (response.ok) {
         const data = await response.json();
         console.log("Signin successful:", data);
-        localStorage.setItem("user_id", data.user.user_id.toString());  // Save user_id to localStorage
+        localStorage.setItem("user_id", data.user.user_id.toString());
+        localStorage.setItem("user_email", data.user.email);
+        localStorage.setItem("user_name", data.user.name || '');
+        localStorage.setItem("isAuthenticated", "true");
         
         router.push("/");
       } else {

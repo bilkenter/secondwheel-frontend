@@ -1,46 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
+import { useRouter } from 'next/navigation';
 
 const Nav: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userInitial, setUserInitial] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
-    // Simulate an authentication check
-    const checkAuth = async () => {
-      // Replace this with your actual authentication logic
-      const isAuthenticated = await fakeAuthCheck();
-      setIsAuthenticated(isAuthenticated);
+    // Check authentication status from localStorage
+    const checkAuth = () => {
+      const isAuth = localStorage.getItem('isAuthenticated') === 'true';
+      setIsAuthenticated(isAuth);
 
-      if (isAuthenticated) {
-      // Simulate fetching user initial
-      const userInitial = await fetchUserInitial();
-      setUserInitial(userInitial);
+      if (isAuth) {
+        const userName = localStorage.getItem('user_name') || '';
+        setUserInitial(userName.charAt(0).toUpperCase());
       }
     };
 
     checkAuth();
-
-    // Fake authentication check function
-    const fakeAuthCheck = async () => {
-      return new Promise<boolean>((resolve) => {
-      setTimeout(() => {
-        resolve(true); // Simulate an authenticated user
-      }, 1000);
-      });
-    };
-
-    // Fake fetch user initial function
-    const fetchUserInitial = async () => {
-      return new Promise<string>((resolve) => {
-      setTimeout(() => {
-        resolve('A'); // Simulate fetching user initial
-      }, 500);
-      });
+    // Add event listener for storage changes
+    window.addEventListener('storage', checkAuth);
+    
+    return () => {
+      window.removeEventListener('storage', checkAuth);
     };
   }, []);
+
+  const handleLogout = () => {
+    // Clear all authentication data
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('user_email');
+    localStorage.removeItem('user_name');
+    localStorage.removeItem('isAuthenticated');
+    setIsAuthenticated(false);
+    router.push('/');
+  };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -86,13 +84,24 @@ const Nav: React.FC = () => {
             </Link>
           </li>
           {isAuthenticated ? (
-            <li>
-              <Link href="/profile">
-                <div className="bg-white text-[#365E84] rounded-full w-8 h-8 flex items-center justify-center font-semibold hover:bg-gray-200 transition-colors">
-                  {userInitial}
-                </div>
-              </Link>
-            </li>
+            <div className="flex items-center space-x-4">
+              <li>
+                <Link href="/profile">
+                  <div className="bg-white text-[#365E84] rounded-full w-8 h-8 flex items-center justify-center font-semibold hover:bg-gray-200 transition-colors">
+                    {userInitial}
+                  </div>
+                </Link>
+              </li>
+              <li>
+                <Button 
+                  variant="outline" 
+                  className="bg-white text-[#365E84] hover:bg-gray-200 font-semibold"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </Button>
+              </li>
+            </div>
           ) : (
             <li>
               <Link href="/signin">

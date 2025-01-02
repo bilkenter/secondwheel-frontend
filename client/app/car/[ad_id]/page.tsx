@@ -71,6 +71,20 @@ export default function CarPage() {
           </CardContent>
         </Card>
       </div>
+<<<<<<< Updated upstream:client/app/car/[ad_id]/page.tsx
+=======
+
+      {car && (
+        <ChatModal
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+          carId={car.id.toString()}
+          sellerId={car.sellerId}
+          currentUserId={localStorage.getItem("user_id") || ''}
+          carTitle={car.title}
+        />
+      )}
+>>>>>>> Stashed changes:client/app/car/page.tsx
     </div>
   );
 }
