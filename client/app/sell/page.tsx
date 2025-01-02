@@ -35,8 +35,9 @@ export default function SellVehiclePage() {
     cabinSpace: "",
     hasSlidingDoor: false,
   });
-  const [images, setImages] = useState<File[]>([]);
+  const [images, setImages] = useState<File[]>([]); // Image state if needed in the future
   const [userId, setUserId] = useState<number | null>(null); // User ID state
+  const [userType, setUserType] = useState<string | null>(null); // User Type state
   const router = useRouter();
 
   useEffect(() => {
@@ -44,12 +45,34 @@ export default function SellVehiclePage() {
       const storedUserId = localStorage.getItem("user_id");
       if (storedUserId) {
         setUserId(parseInt(storedUserId, 10)); // Ensure it's a number
+        // Fetch user data based on the user ID
+        fetchUserData(parseInt(storedUserId, 10));
       } else {
         setAlertMessage("User is not logged in.");
       }
     }
   }, []);
-console.log(userId)
+
+  // Fetch user data to check user type
+  const fetchUserData = async (userId: number) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/get_user_data?user_id=${userId}`);
+      if (response.ok) {
+        const userData = await response.json();
+        setUserType(userData.user.user_type); // Get the user type
+        
+        if (userData.user.user_type !== "Seller") {
+          setAlertMessage("You are not a seller. You cannot post an ad.");
+        }
+      } else {
+        setAlertMessage("Error fetching user data.");
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      setAlertMessage("An unexpected error occurred.");
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     if (type === "checkbox") {
@@ -61,13 +84,19 @@ console.log(userId)
       setVehicleInfo((prevState) => ({ ...prevState, [name]: value }));
     }
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
+    if (alertMessage) {
+      return; // Prevent submission if there's an alert message
+    }
+
     if (vehicleInfo.price <= 0) {
       setAlertMessage("Price must be greater than zero.");
       return;
     }
+
     if (
       Object.values(vehicleInfo).some((value) => value === "") ||
       (vehicleInfo.vehicle_type === "car" && !additionalInfo.numOfDoors) ||
@@ -79,12 +108,12 @@ console.log(userId)
       setAlertMessage("Please fill in all fields.");
       return;
     }
-  
+
     if (!userId) {
       setAlertMessage("User is not logged in.");
       return;
     }
-  
+
     const vehicleData = {
       vehicle_type: vehicleInfo.vehicle_type,
       brand: vehicleInfo.brand,
@@ -102,7 +131,7 @@ console.log(userId)
       description: vehicleInfo.description,
       user_id: userId,
     };
-  
+
     // Add additional info based on vehicle type
     if (vehicleInfo.vehicle_type === "car") {
       vehicleData.numOfDoors = additionalInfo.numOfDoors;
@@ -116,7 +145,7 @@ console.log(userId)
       vehicleData.cabinSpace = additionalInfo.cabinSpace;
       vehicleData.hasSlidingDoor = additionalInfo.hasSlidingDoor;
     }
-  
+
     try {
       const response = await fetch("http://127.0.0.1:8000/create_vehicle_ad/", {
         method: "POST",
@@ -125,7 +154,7 @@ console.log(userId)
         },
         body: JSON.stringify(vehicleData), // Send the vehicleData object as JSON
       });
-  
+
       if (response.ok) {
         const data = await response.json();
         console.log("Ad created successfully:", data);
@@ -139,7 +168,7 @@ console.log(userId)
       setAlertMessage("An unexpected error occurred. Please try again.");
     }
   };
-  
+
   return (
     <div className="container mx-auto p-4">
       <Card>
@@ -166,19 +195,9 @@ console.log(userId)
                 <option value="van">Van</option>
               </select>
             </div>
-            {[
-              "brand",
-              "model_name",
-              "year",
-              "mileage",
-              "fuel_type",
-              "fuel_tank_capacity",
-              "motor_power",
-              "transmission_type",
-              "body_type",
-              "color",
-              "location",
-              "price",
+            {[ 
+              "brand", "model_name", "year", "mileage", "fuel_type", "fuel_tank_capacity", 
+              "motor_power", "transmission_type", "body_type", "color", "location", "price" 
             ].map((field) => (
               <div key={field}>
                 <Input
@@ -288,20 +307,6 @@ console.log(userId)
                 </div>
               </>
             )}
-            {/* Image input commented out */}
-            {/* <div>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleImageChange}
-                className="block w-full text-sm text-gray-500"
-                required
-              />
-              {images.length > 0 && (
-                <p className="text-sm text-gray-600">You have uploaded {images.length} image(s).</p>
-              )}
-            </div> */}
             <Button type="submit">Post Your Ad</Button>
           </form>
         </CardContent>
