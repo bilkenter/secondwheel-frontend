@@ -75,12 +75,13 @@ export default function ProfilePage() {
 
   const handleDeleteAd = async (ad_id: number) => {
     try {
-      const response = await fetch(`/api/delete-ad/${ad_id}`, {
+      // Correct URL format to delete the ad using the ad_id in the URL path
+      const response = await fetch(`http://127.0.0.1:8000/delete_ad/${ad_id}/`, {
         method: 'DELETE',
       });
-
+  
       if (response.ok) {
-        setAds(ads.filter(ad => ad.ad_id !== ad_id));
+        setAds(ads.filter(ad => ad.ad_id !== ad_id)); // Remove the deleted ad from the state
       } else {
         alert('Failed to delete ad');
       }
@@ -89,7 +90,7 @@ export default function ProfilePage() {
       alert('An unexpected error occurred. Please try again.');
     }
   };
-
+  
   const handleUpdateUser = async () => {
     try {
       const response = await fetch('/api/user', {
