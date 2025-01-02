@@ -15,6 +15,7 @@ interface Car {
   mileage: number;
   transmission: string;
   images: string[];  // Keep the images property but don't use it yet
+  user_id: number;
 }
 
 export default function CarPage() {
@@ -71,20 +72,17 @@ export default function CarPage() {
           </CardContent>
         </Card>
       </div>
-<<<<<<< Updated upstream:client/app/car/[ad_id]/page.tsx
-=======
 
       {car && (
         <ChatModal
           isOpen={isChatOpen}
           onClose={() => setIsChatOpen(false)}
-          carId={car.id.toString()}
-          sellerId={car.sellerId}
+          ad_id={car.ad_id.toString()}
+          sellerId={car.user_id}
           currentUserId={localStorage.getItem("user_id") || ''}
           carTitle={car.title}
         />
       )}
->>>>>>> Stashed changes:client/app/car/page.tsx
     </div>
   );
 }
