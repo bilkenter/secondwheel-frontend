@@ -1,60 +1,93 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { api } from '@/lib/apiClient';
 import { useRouter } from "next/navigation";
 
 interface Ad {
   ad_id: number;
   price: number;
   posting_date: string;
-  status: string;  // e.g., "Available" or "Sold"
+  status: string;
+  vehicle_id: number;
 }
 
 interface User {
   name: string;
   email: string;
-  type: string;  // "buyer" or "seller"
+  type: string;
+  user_id: number;
 }
 
 export default function ProfilePage() {
   const [ads, setAds] = useState<Ad[]>([]);
-  const [user, setUser] = useState<User>({ name: '', email: '', type: 'seller' }); //type accordingly
+  const [user, setUser] = useState<User>({ name: '', email: '', type: 'seller', user_id: 0 });
   const [newPassword, setNewPassword] = useState('');
   const router = useRouter();
 
+  // Fetch user data and ads
   useEffect(() => {
     const fetchUserData = async () => {
-      const userResponse = await api('/user');
-      const userData = await userResponse.json();
-      setUser(userData);
+      // Get the user ID from localStorage
+      const storedUserId = localStorage.getItem("user_id");
+      console.log("Fetching ads for user:", storedUserId);
 
-      if (userData.type === 'seller') {
-        const adsResponse = await api('/ads');  // Update API to fetch ads
-        const adsData = await adsResponse.json();
-        setAds(adsData);
+      if (storedUserId) {
+        // Set the user state with the retrieved user ID
+        setUser({ ...user, user_id: parseInt(storedUserId) });
+
+        // Fetch user data based on the user ID
+        try {
+          const userResponse = await fetch(`http://127.0.0.1:8000/get_user_data?user_id=${storedUserId}`);
+          if (userResponse.ok) {
+            const userData = await userResponse.json();
+            setUser({ ...user, ...userData.user }); // Update user state with fetched data
+            console.log("User Data:", userData);
+          } else {
+            console.log("Error fetching user data:", userResponse);
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+
+        // Fetch ads for this user
+        const adsResponse = await fetch(`http://127.0.0.1:8000/get_seller_ads?user_id=${storedUserId}`);
+        if (adsResponse.ok) {
+          const adsData = await adsResponse.json();
+          console.log("Ads Data:", adsData);
+          setAds(adsData.ads);  // Update the state with ads data
+        } else {
+          console.log("Error response:", adsResponse);
+        }
+      } else {
+        console.error("User not logged in");
       }
     };
 
     fetchUserData();
-  }, []);
+  }, []);  // Empty dependency array ensures this runs once when the component mounts
 
   const handleAddAd = () => {
-    router.push("/sell");
-    /*const newAd: Ad = {
-      ad_id: ads.length + 1, // ID logic will be updated in the backend
-      price: 0,              // Placeholder for input value
-      posting_date: new Date().toLocaleDateString(),  // Current date
-      status: 'Available',
-    };
-    setAds([...ads, newAd]);*/
+    router.push("/sell"); // Navigate to the sell page to create a new ad
   };
 
-  const handleDeleteAd = (ad_id: number) => {
-    setAds(ads.filter(ad => ad.ad_id !== ad_id));
+  const handleDeleteAd = async (ad_id: number) => {
+    try {
+      const response = await fetch(`/api/delete-ad/${ad_id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setAds(ads.filter(ad => ad.ad_id !== ad_id));
+      } else {
+        alert('Failed to delete ad');
+      }
+    } catch (error) {
+      console.error('Error deleting ad:', error);
+      alert('An unexpected error occurred. Please try again.');
+    }
   };
 
   const handleUpdateUser = async () => {
@@ -115,21 +148,21 @@ export default function ProfilePage() {
           <CardTitle>User Information</CardTitle>
         </CardHeader>
         <CardContent>
-          <Input 
-            value={user.name} 
+          <Input
+            value={user.name}
             onChange={(e) => setUser({ ...user, name: e.target.value })}
             placeholder="Name"
             className="mb-2"
           />
-          <Input 
-            value={user.email} 
+          <Input
+            value={user.email}
             onChange={(e) => setUser({ ...user, email: e.target.value })}
             placeholder="Email"
             className="mb-2"
           />
-          <Input 
+          <Input
             type="password"
-            value={newPassword} 
+            value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder="New Password"
             className="mb-2"
@@ -155,13 +188,17 @@ export default function ProfilePage() {
               <CardTitle>Your Ad Listings</CardTitle>
             </CardHeader>
             <CardContent>
-              {ads.map((ad) => (
-                <div key={ad.ad_id} className="flex justify-between items-center mb-2">
-                  <span>{ad.posting_date} - ${ad.price}</span>
-                  <span>{ad.status}</span>
-                  <Button onClick={() => handleDeleteAd(ad.ad_id)}>Delete</Button>
-                </div>
-              ))}
+              {ads.length === 0 ? (
+                <p>No ads available. Add a new ad!</p>
+              ) : (
+                ads.map((ad) => (
+                  <div key={ad.ad_id} className="flex justify-between items-center mb-2">
+                    <span>{ad.posting_date} - ${ad.price}</span>
+                    <span>{ad.status}</span>
+                    <Button onClick={() => handleDeleteAd(ad.ad_id)}>Delete</Button>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
         </>
