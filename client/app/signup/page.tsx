@@ -41,6 +41,7 @@ export default function SignupPage() {
       if (response.ok) {
         const data = await response.json();
         console.log("Signup successful:", data);
+        localStorage.setItem("userId", data.user_id)
         router.push("/"); // Redirect after successful signup
       } else {
         const errorData = await response.json();

@@ -30,6 +30,8 @@ export default function SigninPage() {
       if (response.ok) {
         const data = await response.json();
         console.log("Signin successful:", data);
+        localStorage.setItem("user_id", data.user.user_id.toString());  // Save user_id to localStorage
+        
         router.push("/");
       } else {
         const errorData = await response.json();
