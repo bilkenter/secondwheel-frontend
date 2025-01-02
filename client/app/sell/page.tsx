@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,19 +10,20 @@ import { Alert } from "@/components/ui/alert";
 export default function SellVehiclePage() {
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [vehicleInfo, setVehicleInfo] = useState({
-    vehicleType: "",
+    vehicle_type: "",
     brand: "",
-    modelName: "",
+    model_name: "",
     year: "",
     mileage: "",
-    fuelType: "",
-    fuelTankCapacity: "",
-    motorPower: "",
-    transmissionType: "",
-    bodyType: "",
+    fuel_type: "",
+    fuel_tank_capacity: "",
+    motor_power: "",
+    transmission_type: "",
+    body_type: "",
     color: "",
     location: "",
     price: 0,
+    description: "", // Added description
   });
   const [additionalInfo, setAdditionalInfo] = useState({
     numOfDoors: "",
@@ -35,59 +36,110 @@ export default function SellVehiclePage() {
     hasSlidingDoor: false,
   });
   const [images, setImages] = useState<File[]>([]);
+  const [userId, setUserId] = useState<number | null>(null); // User ID state
   const router = useRouter();
 
-    //change with backend
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type} = e.target;
-    if (type === "checkbox") {
-        // Checkbox inputs
-        const checked = (e.target as HTMLInputElement).checked; // Explicit cast to avoid errors
-        setAdditionalInfo((prev) => ({ ...prev, [name]: checked }));
-      } else if (name in additionalInfo) {
-        // Inputs for additionalInfo
-        setAdditionalInfo((prev) => ({ ...prev, [name]: value }));
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedUserId = localStorage.getItem("user_id");
+      if (storedUserId) {
+        setUserId(parseInt(storedUserId, 10)); // Ensure it's a number
       } else {
-        // Inputs for vehicleInfo
-        setVehicleInfo((prevState) => ({ ...prevState, [name]: value }));
+        setAlertMessage("User is not logged in.");
       }
-    };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      setImages(files);
+    }
+  }, []);
+console.log(userId)
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target;
+    if (type === "checkbox") {
+      const checked = (e.target as HTMLInputElement).checked;
+      setAdditionalInfo((prev) => ({ ...prev, [name]: checked }));
+    } else if (name in additionalInfo) {
+      setAdditionalInfo((prev) => ({ ...prev, [name]: value }));
+    } else {
+      setVehicleInfo((prevState) => ({ ...prevState, [name]: value }));
     }
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+  
     if (vehicleInfo.price <= 0) {
-        setAlertMessage("Price must be greater than zero.");
-        return;
-      }
-    if (
-      Object.values(vehicleInfo).some((value) => value === "") ||
-      images.length === 0 ||
-      (vehicleInfo.vehicleType === "car" && !additionalInfo.numOfDoors) ||
-      (vehicleInfo.vehicleType === "motorcycle" &&
-        (!additionalInfo.wheelNumber || !additionalInfo.cylinderVolume)) ||
-      (vehicleInfo.vehicleType === "van" &&
-        (!additionalInfo.seatNumber || !additionalInfo.roofHeight || !additionalInfo.cabinSpace))
-    ) {
-      setAlertMessage("Please fill in all fields and upload at least one image.");
+      setAlertMessage("Price must be greater than zero.");
       return;
     }
-
-    // Perform your submit logic here (e.g., send to backend)
-    console.log("Vehicle Information:", vehicleInfo);
-    console.log("Additional Information:", additionalInfo);
-    console.log("Uploaded Images:", images);
-
-    // Redirect after successful submission
-    router.push("/profile");
+    if (
+      Object.values(vehicleInfo).some((value) => value === "") ||
+      (vehicleInfo.vehicle_type === "car" && !additionalInfo.numOfDoors) ||
+      (vehicleInfo.vehicle_type === "motorcycle" &&
+        (!additionalInfo.wheelNumber || !additionalInfo.cylinderVolume)) ||
+      (vehicleInfo.vehicle_type === "van" &&
+        (!additionalInfo.seatNumber || !additionalInfo.roofHeight || !additionalInfo.cabinSpace))
+    ) {
+      setAlertMessage("Please fill in all fields.");
+      return;
+    }
+  
+    if (!userId) {
+      setAlertMessage("User is not logged in.");
+      return;
+    }
+  
+    const vehicleData = {
+      vehicle_type: vehicleInfo.vehicle_type,
+      brand: vehicleInfo.brand,
+      model_name: vehicleInfo.model_name,
+      year: vehicleInfo.year,
+      mileage: vehicleInfo.mileage,
+      fuel_type: vehicleInfo.fuel_type,
+      fuel_tank_capacity: vehicleInfo.fuel_tank_capacity,
+      motor_power: vehicleInfo.motor_power,
+      transmission_type: vehicleInfo.transmission_type,
+      body_type: vehicleInfo.body_type,
+      color: vehicleInfo.color,
+      location: vehicleInfo.location,
+      price: vehicleInfo.price,
+      description: vehicleInfo.description,
+      user_id: userId,
+    };
+  
+    // Add additional info based on vehicle type
+    if (vehicleInfo.vehicle_type === "car") {
+      vehicleData.numOfDoors = additionalInfo.numOfDoors;
+    } else if (vehicleInfo.vehicle_type === "motorcycle") {
+      vehicleData.wheelNumber = additionalInfo.wheelNumber;
+      vehicleData.cylinderVolume = additionalInfo.cylinderVolume;
+      vehicleData.hasBasket = additionalInfo.hasBasket;
+    } else if (vehicleInfo.vehicle_type === "van") {
+      vehicleData.seatNumber = additionalInfo.seatNumber;
+      vehicleData.roofHeight = additionalInfo.roofHeight;
+      vehicleData.cabinSpace = additionalInfo.cabinSpace;
+      vehicleData.hasSlidingDoor = additionalInfo.hasSlidingDoor;
+    }
+  
+    try {
+      const response = await fetch("http://127.0.0.1:8000/create_vehicle_ad/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", // Ensure the Content-Type is application/json
+        },
+        body: JSON.stringify(vehicleData), // Send the vehicleData object as JSON
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Ad created successfully:", data);
+        router.push("/profile"); // Redirect to profile page to view ads
+      } else {
+        const errorData = await response.json();
+        setAlertMessage(errorData.message || "An error occurred while posting the ad.");
+      }
+    } catch (error) {
+      console.error("Error submitting vehicle ad:", error);
+      setAlertMessage("An unexpected error occurred. Please try again.");
+    }
   };
-
+  
   return (
     <div className="container mx-auto p-4">
       <Card>
@@ -99,12 +151,12 @@ export default function SellVehiclePage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <select
-                name="vehicleType"
-                value={vehicleInfo.vehicleType}
+                name="vehicle_type"
+                value={vehicleInfo.vehicle_type}
                 onChange={handleChange}
                 required
                 className="block w-full p-2 border rounded"
-                style={{ color: vehicleInfo.vehicleType ? "black" : "gray" }}
+                style={{ color: vehicleInfo.vehicle_type ? "black" : "gray" }}
               >
                 <option value="" disabled>
                   Select Vehicle Type
@@ -114,41 +166,45 @@ export default function SellVehiclePage() {
                 <option value="van">Van</option>
               </select>
             </div>
-            {/* Original Fields */}
             {[
               "brand",
-              "modelName",
+              "model_name",
               "year",
               "mileage",
-              "fuelType",
-              "fuelTankCapacity",
-              "motorPower",
-              "transmissionType",
-              "bodyType",
+              "fuel_type",
+              "fuel_tank_capacity",
+              "motor_power",
+              "transmission_type",
+              "body_type",
               "color",
               "location",
               "price",
             ].map((field) => (
               <div key={field}>
                 <Input
-                  type={
-                    field === "year" || field === "price" || field === "mileage"
-                      ? "number"
-                      : "text"
-                  }
+                  type={field === "year" || field === "price" || field === "mileage" ? "number" : "text"}
                   name={field}
-                  placeholder={field
-                    .replace(/([A-Z])/g, " $1")
-                    .replace(/^./, (str) => str.toUpperCase())}
+                  placeholder={field.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
                   value={vehicleInfo[field as keyof typeof vehicleInfo]}
                   onChange={handleChange}
                   required
                 />
               </div>
             ))}
+            {/* Description field */}
+            <div>
+              <Input
+                type="text"
+                name="description"
+                placeholder="Vehicle Description"
+                value={vehicleInfo.description}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
             {/* Additional Fields */}
-            {vehicleInfo.vehicleType === "car" && (
+            {vehicleInfo.vehicle_type === "car" && (
               <div>
                 <Input
                   type="number"
@@ -160,7 +216,7 @@ export default function SellVehiclePage() {
                 />
               </div>
             )}
-            {vehicleInfo.vehicleType === "motorcycle" && (
+            {vehicleInfo.vehicle_type === "motorcycle" && (
               <>
                 <Input
                   type="number"
@@ -192,7 +248,7 @@ export default function SellVehiclePage() {
                 </div>
               </>
             )}
-            {vehicleInfo.vehicleType === "van" && (
+            {vehicleInfo.vehicle_type === "van" && (
               <>
                 <Input
                   type="number"
@@ -232,7 +288,8 @@ export default function SellVehiclePage() {
                 </div>
               </>
             )}
-            <div>
+            {/* Image input commented out */}
+            {/* <div>
               <input
                 type="file"
                 accept="image/*"
@@ -244,7 +301,7 @@ export default function SellVehiclePage() {
               {images.length > 0 && (
                 <p className="text-sm text-gray-600">You have uploaded {images.length} image(s).</p>
               )}
-            </div>
+            </div> */}
             <Button type="submit">Post Your Ad</Button>
           </form>
         </CardContent>
