@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface Ad {
   ad_id: number;
@@ -21,11 +22,23 @@ interface User {
   user_id: number;
 }
 
+interface Chat {
+  carId: string;
+  carTitle: string;
+  lastMessage?: {
+    content: string;
+    timestamp: Date;
+  };
+  buyerId: string;
+  buyerName: string;
+}
+
 export default function ProfilePage() {
   const [ads, setAds] = useState<Ad[]>([]);
   const [user, setUser] = useState<User>({ name: '', email: '', type: 'seller', user_id: 0 });
   const [newPassword, setNewPassword] = useState('');
   const [balance, setBalance] = useState(0);
+  const [chats, setChats] = useState<Chat[]>([]);
   const router = useRouter();
 
   // Fetch user data and ads
@@ -70,6 +83,25 @@ export default function ProfilePage() {
 
     fetchUserData();
   }, []);  // Empty dependency array ensures this runs once when the component mounts
+
+  useEffect(() => {
+    const fetchChats = async () => {
+      if (user.user_id) {
+        try {
+          // API endpoint /api/chat/seller/[userId] needed
+          const response = await fetch(`/api/chat/seller/${user.user_id}`);
+          if (response.ok) {
+            const data = await response.json();
+            setChats(data);
+          }
+        } catch (error) {
+          console.error('Error fetching chats:', error);
+        }
+      }
+    };
+
+    fetchChats();
+  }, [user.user_id]);
 
   const handleAddAd = () => {
     router.push("/sell"); // Navigate to the sell page to create a new ad
@@ -210,6 +242,42 @@ export default function ProfilePage() {
                     <Button onClick={() => handleDeleteAd(ad.ad_id)}>Delete</Button>
                   </div>
                 ))
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Your Chats</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {chats.length === 0 ? (
+                <p>No active chats</p>
+              ) : (
+                <div className="space-y-4">
+                  {chats.map((chat) => (
+                    <Link 
+                      href={`/chat/${chat.carId}`} 
+                      key={chat.carId}
+                      className="block p-4 border rounded-lg hover:bg-gray-50"
+                    >
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h3 className="font-medium">{chat.carTitle}</h3>
+                          <p className="text-sm text-gray-500">
+                            Chatting with: {chat.buyerName}
+                          </p>
+                        </div>
+                        {chat.lastMessage && (
+                          <div className="text-sm text-gray-500">
+                            <p>{chat.lastMessage.content}</p>
+                            <p>{new Date(chat.lastMessage.timestamp).toLocaleDateString()}</p>
+                          </div>
+                        )}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
               )}
             </CardContent>
           </Card>
