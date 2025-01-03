@@ -73,6 +73,11 @@ export default function VehiclePage() {
   const [isOfferPending, setIsOfferPending] = useState(false);
   const router = useRouter();
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [rating, setRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
 
   //fetch real data
   useEffect(() => {
@@ -156,18 +161,38 @@ export default function VehiclePage() {
   };
 
   const handleContactSellerClick = () => {
-    setIsContactModalOpen(true);
+    setIsChatOpen(true);
+  };
+
+  const handleReportAdClick = () => {
+    setIsReportModalOpen(true);
+  };
+  
+  const handleGiveReviewClick = () => {
+    setIsReviewModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsContactModalOpen(false);
     setIsOfferModalOpen(false);
+    setIsReportModalOpen(false);
+    setIsReviewModalOpen(false)
   };
 
   const handleOfferSubmit = () => {
     console.log("Offer submitted:", offerAmount);
     setIsOfferModalOpen(false); // Close the offer modal after submitting
     setIsOfferPending(true);
+  };
+
+  const handleReportSubmit = () => {
+    console.log("Report Reason:", reportReason);
+    setIsReportModalOpen(false);
+  };
+  
+  const handleReviewSubmit = () => {
+    console.log("Rating:", rating, "Comment:", reviewComment);
+    setIsReviewModalOpen(false);
   };
 
   const handleNextImage = () => {
@@ -238,9 +263,9 @@ export default function VehiclePage() {
             )}
           </div>
           <div
-            className="flex gap-4"
+            className="grid grid-cols-2 gap-4"
             style={{
-              marginTop: "70px", // Added margin to move the buttons further down
+              marginTop: "50px",
               marginLeft: "190px",
             }}
           >
@@ -248,13 +273,13 @@ export default function VehiclePage() {
               style={{
                 backgroundColor: "#12314E",
                 color: "white",
-                width: "278px", // Set button width
-                height: "69px", // Set button height
-                fontSize: "20px", // Set larger font size
-                fontWeight: "500", // Optional: Make the text bold
+                width: "238px",
+                height: "55px",
+                fontSize: "18px",
+                fontWeight: "500",
                 borderRadius: "20px",
               }}
-              onClick={() => setIsChatOpen(true)} // Open chat
+              onClick={handleContactSellerClick} // Open chat
             >
               Contact Seller
             </Button>
@@ -262,10 +287,10 @@ export default function VehiclePage() {
               style={{
                 backgroundColor: "#12314E",
                 color: "white",
-                width: "278px", // Set button width
-                height: "69px", // Set button height
-                fontSize: "20px", // Set larger font size
-                fontWeight: "500", // Optional: Make the text bold
+                width: "238px",
+                height: "55px",
+                fontSize: "18px",
+                fontWeight: "500",
                 borderRadius: "20px",
               }}
               disabled={vehicle.status.toLowerCase() === "sold"}
@@ -273,9 +298,43 @@ export default function VehiclePage() {
             >
               Make Offer
             </Button>
+            <Button
+              style={{
+                backgroundColor: "#12314E",
+                color: "white",
+                width: "238px",
+                height: "55px",
+                fontSize: "18px",
+                fontWeight: "500",
+                borderRadius: "20px",
+              }}
+              onClick={handleReportAdClick}
+            >
+              Report Ad
+            </Button>
+            <Button
+              style={{
+                backgroundColor: "#12314E",
+                color: "white",
+                width: "238px",
+                height: "55px",
+                fontSize: "18px",
+                fontWeight: "500",
+                borderRadius: "20px",
+              }}
+              onClick={handleGiveReviewClick}
+            >
+              Give Review
+            </Button>
+            {/* Offer Pending Message */}
             {isOfferPending && (
               <p
-                style={{ color: "red", fontStyle: "italic", marginTop: "10px" }}
+                style={{
+                  color: "red",
+                  fontStyle: "italic",
+                  marginTop: "10px",
+                  gridColumn: "span 2", //the message spans both columns
+                }}
               >
                 Your offer is pending approval!
               </p>
@@ -290,15 +349,15 @@ export default function VehiclePage() {
             backgroundColor: "#CDD2EF",
             border: "1px solid #12314E",
             boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-            width: "575px", // Set width to 575px
-            height: "705px", // Set height to 705px
+            width: "575px",
+            height: "705px",
             marginTop: "20px",
             marginLeft: "80px",
           }}
         >
           {vehicle.status.toLowerCase() === "sold" && (
             <img
-              src="/icons/sold.svg" // Replace with the actual path to your sold.svg file
+              src="/icons/sold.svg"
               alt="Sold"
               style={{
                 position: "absolute",
@@ -527,6 +586,49 @@ export default function VehiclePage() {
                   Cancel
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Report Ad Modal */}
+      {isReportModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Report Ad</h2>
+            <textarea
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              placeholder="Enter the reason for reporting this ad..."
+            />
+            <div className="modal-actions">
+              <Button onClick={handleReportSubmit}>Submit</Button>
+              <Button onClick={handleCloseModal}>Cancel</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Give Review Modal */}
+      {isReviewModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Give Review</h2>
+            <input
+              type="number"
+              value={rating}
+              min={0}
+              max={5}
+              onChange={(e) => setRating(Number(e.target.value))}
+              placeholder="Rate out of 5"
+            />
+            <textarea
+              value={reviewComment}
+              onChange={(e) => setReviewComment(e.target.value)}
+              placeholder="Write your review..."
+            />
+            <div className="modal-actions">
+              <Button onClick={handleReviewSubmit}>Submit</Button>
+              <Button onClick={handleCloseModal}>Cancel</Button>
             </div>
           </div>
         </div>
