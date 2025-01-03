@@ -199,7 +199,7 @@ export default function Home() {
           <div className="mb-8 flex justify-between items-center">
             <Input
               type="text"
-              placeholder="Search for cars..."
+              placeholder="Search for vehicles..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full mr-4"
@@ -211,7 +211,7 @@ export default function Home() {
               }}
               variant={comparingMode ? "destructive" : "default"}
             >
-              {comparingMode ? "Cancel Compare" : "Compare Cars"}
+              {comparingMode ? "Cancel Compare" : "Compare Vehicles"}
             </Button>
             {comparingMode && (
               <Button
