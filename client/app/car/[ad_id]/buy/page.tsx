@@ -17,12 +17,12 @@ interface Car {
 
 interface User {
   credits: number;
-  user_type: string;  // Add user_type here
-  user_id: number;    // Ensure user_id is available
+  user_type: string; 
+  user_id: number;
 }
 
 export default function BuyCarPage() {
-  const { ad_id } = useParams();  // Capture ad_id from URL
+  const { ad_id } = useParams(); 
   const [car, setCar] = useState<Car | null>(null);
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -33,12 +33,10 @@ export default function BuyCarPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch car data
         const carResponse = await fetch(`http://127.0.0.1:8000/car/${ad_id}/`);
         const carData = await carResponse.json();
         setCar(carData);
 
-        // Fetch user data (including credits and user type)
         const storedUserId = localStorage.getItem("user_id");
         if (!storedUserId) {
           setError("User not logged in.");
@@ -64,7 +62,6 @@ export default function BuyCarPage() {
     setLoading(true);
     setError(null);
 
-    // Check if the user is a seller
     if (user.user_type !== "Seller") {
       setError("You must be a seller to purchase this car.");
       setLoading(false);
@@ -91,7 +88,6 @@ export default function BuyCarPage() {
       }
 
       setSuccess(true);
-      // Redirect to success page after 2 seconds
       setTimeout(() => {
         router.push('/purchase/success');
       }, 2000);

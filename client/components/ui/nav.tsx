@@ -8,7 +8,6 @@ const Nav: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    // Fetch user initial from the backend using the user_id
     const fetchUserInitial = async (userId: string) => {
       const response = await fetch(`http://127.0.0.1:8000/get_user_data?user_id=${userId}`);
       if (response.ok) {
@@ -16,16 +15,14 @@ const Nav: React.FC = () => {
         const username = data.user.username;
         return username.charAt(0).toUpperCase()
       } else {
-        return 'U';  // Default fallback in case of error
+        return 'U'; 
       }
     };
     const checkAuth = async () => {
-      // Check if the user_id exists in localStorage (indicating they are authenticated)
       const userId = localStorage.getItem("user_id");
       if (userId) {
         setIsAuthenticated(true);
 
-        // Fetch the user's username from the backend
         const username = await fetchUserInitial(userId);
         setUserInitial(username);
       } else {
@@ -43,7 +40,6 @@ const Nav: React.FC = () => {
   };
 
   const handleLogout = () => {
-    // Remove user_id from localStorage and update the state
     localStorage.removeItem("user_id");
     setIsAuthenticated(false);
     setUserInitial('');

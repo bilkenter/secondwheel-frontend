@@ -38,7 +38,7 @@ export default function ComparePage() {
         const ad_id2Id = searchParams.get('ad2');
 
         if (!ad_id1Id || !ad_id2Id) {
-          router.push('/');  // Redirect if no cars are selected
+          router.push('/'); 
           return;
         }
 
@@ -49,7 +49,7 @@ export default function ComparePage() {
         if (ad_id1Data && ad_id1Data.ad_id) {
           setad_id1({
             ...ad_id1Data,
-            image_urls: ad_id1Data.image_urls || [], // Handle image URLs if they exist
+            image_urls: ad_id1Data.image_urls || [], 
           });
         } else {
           console.error("No vehicle data found for ad1.");
@@ -58,17 +58,15 @@ export default function ComparePage() {
         if (ad_id2Data && ad_id2Data.ad_id) {
           setad_id2({
             ...ad_id2Data,
-            image_urls: ad_id2Data.image_urls || [], // Handle image URLs if they exist
+            image_urls: ad_id2Data.image_urls || [],
           });
         } else {
           console.error("No vehicle data found for ad2.");
         }
 
-        console.log('Car 1:', ad_id1Data); // Log ad_id1 data
-        console.log('Car 2:', ad_id2Data); // Log ad_id2 data
+        console.log('Car 1:', ad_id1Data); 
+        console.log('Car 2:', ad_id2Data); 
 
-        //setad_id1(ad_id1Data);
-        //setad_id2(ad_id2Data);
       } catch (error) {
         console.error('Error fetching cars:', error);
       }
@@ -102,7 +100,6 @@ export default function ComparePage() {
         <h1 className="text-2xl font-bold mb-6 text-center">Vehicle Comparison</h1>
 
         <div className="grid grid-cols-3 gap-4">
-          {/* Car 1 */}
           <div>
           <img src={ad_id1.image_urls[0] || 'https://via.placeholder.com/150'} alt={ad_id1.title} />
           <Card>
@@ -117,12 +114,10 @@ export default function ComparePage() {
             </Card>
           </div>
 
-          {/* VS Column */}
           <div className="flex items-center justify-center">
             <div className="text-4xl font-bold">VS</div>
           </div>
 
-          {/* Car 2 */}
           <div>
           <img src={ad_id2.image_urls[0] || 'https://via.placeholder.com/150'} alt={ad_id2.title} />
           <Card>

@@ -20,53 +20,32 @@ interface Vehicle {
   transmission_type: string;
   body_type: string;
   color: string;
-  vehicle_type: "Car" | "Motorcycle" | "Van"; // New attribute for vehicle type
-  number_of_doors?: number; // Only for cars
-  wheel_number?: number; // Only for motorcycles
-  cylinder_volume?: number; // Only for motorcycles
-  has_basket?: boolean; // Only for motorcycles
-  seat_number?: number; // Only for vans
-  roof_height?: number; // Only for vans
-  cabin_space?: number; // Only for vans
-  has_sliding_door?: boolean; // Only for vans
+  vehicle_type: "Car" | "Motorcycle" | "Van"; 
+  number_of_doors?: number;
+  wheel_number?: number;
+  cylinder_volume?: number; 
+  has_basket?: boolean; 
+  seat_number?: number;
+  roof_height?: number; 
+  cabin_space?: number; 
+  has_sliding_door?: boolean; 
   ad_id: number;
   price: number;
   location: string;
   description: string;
   posting_date: string;
   status: string;
-  seller_name: string; // Seller's name
-  seller_email: string; // Seller's email address
-  image_urls: string[];  // Keep the images property but don't use it yet
+  seller_name: string; 
+  seller_email: string; 
+  image_urls: string[];  
   user_id: number;
   title: string;
   pdf_file: string;
 }
 
-/*interface Ad {
-  ad_id: number;
-  price: number;
-  location: string;
-  description: string;
-  posting_date: string;
-  status: string;
-  seller_name: string; // Seller's name
-  seller_email: string; // Seller's email address
-}
-
-interface Image {
-  image_id: number;
-  ad_id: number;
-  extension: string;
-  height: number;
-  width: number;
-}
-*/
 export default function VehiclePage() {
-  const { ad_id } = useParams(); // ad_id
-  //const [ad, setAd] = useState<Ad | null>(null);
+  const { ad_id } = useParams(); 
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
-  //const [images, setImages] = useState<Image[]>([]);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
   const [offerAmount, setOfferAmount] = useState("");
@@ -85,20 +64,18 @@ export default function VehiclePage() {
       try {
         const response = await fetch(`http://127.0.0.1:8000/vehicle/${ad_id}/`);
 
-        // Check if the response is successful
         if (!response.ok) {
           console.error("Failed to fetch vehicle data, status:", response.status);
           return;
         }
 
         const data = await response.json();
-        console.log("Fetched data:", data);  // Log the response data
+        console.log("Fetched data:", data); 
 
-        // Check if vehicle data is returned as an object
         if (data && data.ad_id) {
           setVehicle({
             ...data,
-            image_urls: data.image_urls || [], // Handle image URLs if they exist
+            image_urls: data.image_urls || [],
           });
         } else {
           console.error("No vehicle data found.");
@@ -111,58 +88,6 @@ export default function VehiclePage() {
     fetchAdData();
   }, [ad_id]);
 
-
-  //if (!vehicle) return <div>Loading...</div>;
-
-  /*
-    // Mock data for testing
-    useEffect(() => {
-      const fetchMockData = () => {
-        // Mock Ad Data
-        const mockAd: Ad = {
-          ad_id: 1,
-          price: 25000,
-          location: "New York, NY",
-          description:
-            "Well-maintained 2020 Toyota Corolla, excellent condition.",
-          posting_date: "2023-12-10",
-          status: "Available",
-          seller_name: "Hermione Granger", // Adding seller name
-          seller_email: "hermione@example.com", // Adding seller email
-        };
-  
-        // Mock Vehicle Data
-        const mockVehicle: Vehicle = {
-          vehicle_type: "Car",
-          vehicle_id: 1,
-          brand: "Toyota",
-          model_name: "Corolla",
-          year: 2020,
-          mileage: 12000,
-          motor_power: 132,
-          fuel_type: "Gasoline",
-          fuel_tank_capacity: 50,
-          transmission_type: "Automatic",
-          body_type: "Sedan",
-          color: "White",
-          number_of_doors: 4,
-        };
-  
-        // Mock Images Data
-        const images: Image[] = [
-          { image_id: 1, ad_id: 1, extension: "jpg", height: 500, width: 800 },
-          { image_id: 2, ad_id: 1, extension: "jpg", height: 500, width: 800 },
-        ];
-  
-        // Set the mock data
-        setAd(mockAd);
-        setVehicle(mockVehicle);
-        setImages(images);
-      };
-  
-      fetchMockData();
-    }, [ad_id]);
-  */
   const handleMakeOfferClick = () => {
     setIsOfferModalOpen(true);
   };
@@ -187,21 +112,18 @@ export default function VehiclePage() {
   };
 
   const handleOfferSubmit = async () => {
-    // Validate offerAmount
     if (!offerAmount || parseFloat(offerAmount) <= 0) {
       alert("Please enter a valid offer amount.");
       return;
     }
 
     try {
-      // Create the request payload
       const offerData = {
         ad_id: vehicle?.ad_id,
         offered_price: parseFloat(offerAmount),
-        user_id: localStorage.getItem("user_id"),  // Get the current user ID (this should be saved in local storage)
+        user_id: localStorage.getItem("user_id"),  
       };
 
-      // Send POST request to make an offer
       const response = await fetch("http://127.0.0.1:8000/make_offer/", {
         method: "POST",
         headers: {
@@ -213,8 +135,8 @@ export default function VehiclePage() {
       if (response.ok) {
         const result = await response.json();
         console.log("Offer made successfully:", result);
-        setIsOfferPending(true);  // Set offer pending state
-        setIsOfferModalOpen(false);  // Close the offer modal
+        setIsOfferPending(true);  
+        setIsOfferModalOpen(false);  
       } else {
         const error = await response.json();
         console.error("Failed to make an offer:", error);
@@ -257,11 +179,8 @@ export default function VehiclePage() {
         Vehicle Details
       </h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Left Side: Image and Buttons */}
         <div>
-          {/* Placeholder for the image */}
           <div className="relative">
-            {/* Display the first image from the image_urls */}
             {vehicle?.image_urls && vehicle.image_urls.length > 0 ? (
               <img
                 src={vehicle.image_urls[currentImageIndex]}
@@ -281,10 +200,8 @@ export default function VehiclePage() {
               <p>No images available for this car at the moment.</p>
             )}
 
-            {/* Image Navigation Buttons */}
             {vehicle?.image_urls.length > 1 && (
               <>
-                {/* Previous Image Button */}
                 <button
                   onClick={handlePrevImage}
                   className="absolute top-1/2 left-20 ml-9 transform -translate-y-1/2 bg-[#12314E] text-white p-2 rounded-full"
@@ -292,7 +209,6 @@ export default function VehiclePage() {
                 >
                   &#10094;
                 </button>
-                {/* Next Image Button */}
                 <button
                   onClick={handleNextImage}
                   className="absolute top-1/2 right-0 transform -translate-y-1/2 bg-[#12314E] text-white p-2 rounded-full"
@@ -367,14 +283,13 @@ export default function VehiclePage() {
             >
               Give Review
             </Button>
-            {/* Offer Pending Message */}
             {isOfferPending && (
               <p
                 style={{
                   color: "red",
                   fontStyle: "italic",
                   marginTop: "10px",
-                  gridColumn: "span 2", //the message spans both columns
+                  gridColumn: "span 2",
                 }}
               >
                 Your offer is pending approval!
@@ -383,7 +298,6 @@ export default function VehiclePage() {
           </div>
         </div>
 
-        {/* Right Side: Details Card */}
         <Card
           style={{
             position: "relative",

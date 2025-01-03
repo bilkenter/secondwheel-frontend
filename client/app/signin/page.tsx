@@ -11,7 +11,7 @@ export default function SigninPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [forgotMessage, setForgotMessage] = useState<string | null>(null); // Alert for forgot password
+  const [forgotMessage, setForgotMessage] = useState<string | null>(null); 
   const router = useRouter();
 
   const handleSignin = async (e: React.FormEvent) => {

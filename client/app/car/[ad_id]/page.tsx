@@ -15,12 +15,12 @@ interface Car {
   year: number;
   mileage: number;
   transmission: string;
-  images: string[];  // Keep the images property but don't use it yet
-  user_id: number | null; // user_id can now be null if not available
+  images: string[];
+  user_id: number | null; 
 }
 
 export default function CarPage() {
-  const { ad_id } = useParams();  // Capture ad_id from URL
+  const { ad_id } = useParams();
   const [car, setCar] = useState<Car | null>(null);
   const router = useRouter();
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -38,11 +38,10 @@ export default function CarPage() {
     };
 
     fetchCarData();
-  }, [ad_id]); // Run this useEffect only when ad_id changes
+  }, [ad_id]); 
 
   if (!car) return <div>Loading...</div>;
 
-  // Ensure user_id exists and is properly converted to string
   const sellerId = car.user_id ? car.user_id.toString() : '';
 
   return (
@@ -55,7 +54,6 @@ export default function CarPage() {
             <CardTitle>Images</CardTitle>
           </CardHeader>
           <CardContent>
-            {/* Placeholder message instead of fetching images */}
             <p>No images available for this car at the moment.</p>
           </CardContent>
         </Card>

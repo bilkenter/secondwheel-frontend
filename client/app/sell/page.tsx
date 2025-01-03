@@ -23,30 +23,29 @@ export default function SellVehiclePage() {
     color: "",
     location: "",
     price: 0,
-    description: "", // Added description
+    description: "",
   });
   const [additionalInfo, setAdditionalInfo] = useState({
     numOfDoors: "",
     wheelNumber: "",
     cylinderVolume: "",
-    hasBasket: false,
+    hasBasket: 0,
     seatNumber: "",
     roofHeight: "",
     cabinSpace: "",
     hasSlidingDoor: false,
   });
-  const [image_urls, setImages] = useState<File[]>([]); // Image state if needed in the future
-  const [pdfFile, setPdfFile] = useState<File | null>(null); // State for PDF file upload
-  const [userId, setUserId] = useState<number | null>(null); // User ID state
-  const [userType, setUserType] = useState<string | null>(null); // User Type state
+  const [image_urls, setImages] = useState<File[]>([]); 
+  const [pdfFile, setPdfFile] = useState<File | null>(null); 
+  const [userId, setUserId] = useState<number | null>(null); 
+  const [userType, setUserType] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedUserId = localStorage.getItem("user_id");
       if (storedUserId) {
-        setUserId(parseInt(storedUserId, 10)); // Ensure it's a number
-        // Fetch user data based on the user ID
+        setUserId(parseInt(storedUserId, 10));
         fetchUserData(parseInt(storedUserId, 10));
       } else {
         setAlertMessage("User is not logged in.");
@@ -54,13 +53,12 @@ export default function SellVehiclePage() {
     }
   }, []);
 
-  // Fetch user data to check user type
   const fetchUserData = async (userId: number) => {
     try {
       const response = await fetch(`http://127.0.0.1:8000/get_user_data?user_id=${userId}`);
       if (response.ok) {
         const userData = await response.json();
-        setUserType(userData.user.user_type); // Get the user type
+        setUserType(userData.user.user_type); 
         
         if (userData.user.user_type !== "Seller") {
           setAlertMessage("You are not a seller. You cannot post an ad.");
@@ -78,7 +76,7 @@ export default function SellVehiclePage() {
     const { name, value, type } = e.target;
     if (type === "checkbox") {
       const checked = (e.target as HTMLInputElement).checked;
-      setAdditionalInfo((prev) => ({ ...prev, [name]: checked }));
+      setAdditionalInfo((prev) => ({ ...prev, [name]: checked ? '1' : '0' }));
     } else if (name in additionalInfo) {
       setAdditionalInfo((prev) => ({ ...prev, [name]: value }));
     } else {
@@ -86,16 +84,14 @@ export default function SellVehiclePage() {
     }
   };
 
-  // Separate function for handling file changes
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setImages(Array.from(e.target.files)); // Store selected image files
+      setImages(Array.from(e.target.files));
     }
   };
-  // Separate function for handling PDF file changes (expert report)
   const handlePdfFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setPdfFile(e.target.files[0]); // Store selected PDF file
+      setPdfFile(e.target.files[0]); 
     }
   };
 
@@ -104,7 +100,7 @@ export default function SellVehiclePage() {
     e.preventDefault();
 
     if (alertMessage) {
-      return; // Prevent submission if there's an alert message
+      return; 
     }
 
     if (vehicleInfo.price <= 0) {
@@ -147,7 +143,6 @@ export default function SellVehiclePage() {
       user_id: userId,
     };
 
-    // Add additional info based on vehicle type
     if (vehicleInfo.vehicle_type === "Car") {
       vehicleData.numOfDoors = additionalInfo.numOfDoors;
     } else if (vehicleInfo.vehicle_type === "Motorcycle") {
@@ -160,33 +155,26 @@ export default function SellVehiclePage() {
       vehicleData.cabinSpace = additionalInfo.cabinSpace;
       vehicleData.hasSlidingDoor = additionalInfo.hasSlidingDoor;
     }
-
-    // Create a FormData object to send the vehicle data and images
     const formData = new FormData();
     formData.append('vehicle_data', JSON.stringify(vehicleData));
 
-    // Append images to formData
     image_urls.forEach((image) => {
       formData.append('images', image);
     });
-    // Append the PDF file if exists
     if (pdfFile) {
       formData.append('pdf_file', pdfFile);
     }
 
     try {
       const response = await fetch("http://127.0.0.1:8000/create_vehicle_ad/", {
-        method: "POST",/* 
-        headers: {
-          "Content-Type": "application/json", // Ensure the Content-Type is application/json
-        }, */
-        body: formData, // Send the vehicleData object as JSON
+        method: "POST",
+        body: formData, 
       });
 
       if (response.ok) {
         const data = await response.json();
         console.log("Ad created successfully:", data);
-        router.push("/profile"); // Redirect to profile page to view ads
+        router.push("/profile");
       } else {
         const errorData = await response.json();
         setAlertMessage(errorData.message || "An error occurred while posting the ad.");

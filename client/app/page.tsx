@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 
 interface Vehicle {
-  ad_id: number;  // changed to ad_id
+  ad_id: number;  
   title: string;
   description: string;
   price: number;
@@ -16,8 +16,7 @@ interface Vehicle {
   year: number;
   mileage: number;
   transmission: string;
-  image_urls: string[]; // Change 'image' to 'image_urls' to handle multiple images
-}
+  image_urls: string[];}
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,7 +31,7 @@ export default function Home() {
   const [comparingMode, setComparingMode] = useState(false);
   const [selectedVehicles, setSelectedVehicles] = useState<Vehicle[]>([]);
   const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([]);
-  const [selectedBrand, setSelectedBrand] = useState<string>(''); // Added selectedBrand state
+  const [selectedBrand, setSelectedBrand] = useState<string>(''); 
   const router = useRouter();
 
   const validatePriceRange = (min: string, max: string) => {
@@ -67,13 +66,12 @@ export default function Home() {
 
   const handleCompare = () => {
     if (selectedVehicles.length === 2) {
-      console.log(selectedVehicles[0].ad_id, selectedVehicles[1].ad_id); // Check the ids
+      console.log(selectedVehicles[0].ad_id, selectedVehicles[1].ad_id);
 
       router.push(`/compare?ad1=${selectedVehicles[0].ad_id}&ad2=${selectedVehicles[1].ad_id}`);
     }
   };
 
-  // Function to filter vehicles based on selected filters
   const filterVehicles = () => {
     const filtered = vehicles.filter(vehicle => {
       const matchesPrice =
@@ -85,7 +83,7 @@ export default function Home() {
       const matchesMileage =
         maxMileage ? vehicle.mileage <= Number(maxMileage) : true;
       const matchesBrand =
-        selectedBrand ? vehicle.brand.toLowerCase() === selectedBrand.toLowerCase() : true; // Check for selected brand
+        selectedBrand ? vehicle.brand.toLowerCase() === selectedBrand.toLowerCase() : true; 
 
       const matchesSearch =
         searchTerm ? vehicle.title.toLowerCase().includes(searchTerm.toLowerCase()) : true;
@@ -109,11 +107,11 @@ export default function Home() {
         const data = await response.json();
         const vehiclesData = data.cars.map((car: any) => ({
           ...car,
-          image: car.image_urls[0] ? `http://127.0.0.1:8000${car.image_urls[0]}` : "", // Prepend the base URL to the relative image URL
+          image: car.image_urls[0] ? `http://127.0.0.1:8000${car.image_urls[0]}` : "", 
         }));
 
         setVehicles(vehiclesData);
-        setFilteredVehicles(vehiclesData); // Initially show all vehicles
+        setFilteredVehicles(vehiclesData); 
       } catch (error) {
         console.error("Error fetching vehicles:", error);
       }
@@ -122,7 +120,6 @@ export default function Home() {
     fetchVehicles();
   }, []);
 
-  // Re-filter the vehicles whenever a filter changes
   useEffect(() => {
     filterVehicles();
   }, [minPrice, maxPrice, yearFrom, yearTo, maxMileage, searchTerm, selectedBrand]);
@@ -141,8 +138,8 @@ export default function Home() {
                 id="brand"
                 className="w-full p-2 border rounded"
                 value={selectedBrand}
-                onChange={(e) => setSelectedBrand(e.target.value)} // Handle brand filter change
-              >
+                onChange={(e) => setSelectedBrand(e.target.value)}
+                >
                 <option value="">All Brands</option>
                 <option value="toyota">Toyota</option>
                 <option value="honda">Honda</option>
@@ -268,13 +265,12 @@ export default function Home() {
             )}
           </div>
 
-          {/* Car listings */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredVehicles.length > 0 ? (
               filteredVehicles.map((vehicle) => (
                 <div
                   key={vehicle.ad_id}
-                  onClick={() => comparingMode ? handleVehicleSelect(vehicle) : router.push(`/vehicle/${vehicle.ad_id}`)} // Use ad_id here for routing
+                  onClick={() => comparingMode ? handleVehicleSelect(vehicle) : router.push(`/vehicle/${vehicle.ad_id}`)}
 
                   className={`cursor-pointer transition-transform hover:scale-105 relative ${comparingMode && selectedVehicles.find(c => c.ad_id === vehicle.ad_id)
                     ? 'ring-2 ring-blue-500'
@@ -288,10 +284,10 @@ export default function Home() {
                   )}
                   <Card className="overflow-hidden">
                     <img
-                      src={vehicle.image_urls.length > 0 ? vehicle.image_urls[0] : "https://via.placeholder.com/150"} // Use the image URLs stored in the database
+                      src={vehicle.image_urls.length > 0 ? vehicle.image_urls[0] : "https://via.placeholder.com/150"}
                       alt={vehicle.title}
                       className="w-full h-48 object-cover"
-                      onError={(e) => e.currentTarget.src = "https://via.placeholder.com/150"} // Fallback image if error occurs
+                      onError={(e) => e.currentTarget.src = "https://via.placeholder.com/150"}
                     />
                     <CardHeader>
                       <CardTitle>{vehicle.title}</CardTitle>

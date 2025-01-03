@@ -41,23 +41,18 @@ export default function ProfilePage() {
   const [chats, setChats] = useState<Chat[]>([]);
   const router = useRouter();
 
-  // Fetch user data and ads
   useEffect(() => {
     const fetchUserData = async () => {
-      // Get the user ID from localStorage
       const storedUserId = localStorage.getItem("user_id");
       console.log("Fetching ads for user:", storedUserId);
 
       if (storedUserId) {
-        // Set the user state with the retrieved user ID
         setUser({ ...user, user_id: parseInt(storedUserId) });
-
-        // Fetch user data based on the user ID
         try {
           const userResponse = await fetch(`http://127.0.0.1:8000/get_user_data?user_id=${storedUserId}`);
           if (userResponse.ok) {
             const userData = await userResponse.json();
-            setUser({ ...user, ...userData.user }); // Update user state with fetched data
+            setUser({ ...user, ...userData.user });
             setBalance(userData.user.balance || 0);
             console.log("User Data:", userData);
           } else {
@@ -67,12 +62,11 @@ export default function ProfilePage() {
           console.error("Error fetching user data:", error);
         }
 
-        // Fetch ads for this user
         const adsResponse = await fetch(`http://127.0.0.1:8000/get_seller_ads?user_id=${storedUserId}`);
         if (adsResponse.ok) {
           const adsData = await adsResponse.json();
           console.log("Ads Data:", adsData);
-          setAds(adsData.ads);  // Update the state with ads data
+          setAds(adsData.ads); 
         } else {
           console.log("Error response:", adsResponse);
         }
@@ -82,13 +76,12 @@ export default function ProfilePage() {
     };
 
     fetchUserData();
-  }, []);  // Empty dependency array ensures this runs once when the component mounts
+  }, []); 
 
   useEffect(() => {
     const fetchChats = async () => {
       if (user.user_id) {
         try {
-          // API endpoint /api/chat/seller/[userId] needed
           const response = await fetch(`/api/chat/seller/${user.user_id}`);
           if (response.ok) {
             const data = await response.json();
@@ -104,18 +97,17 @@ export default function ProfilePage() {
   }, [user.user_id]);
 
   const handleAddAd = () => {
-    router.push("/sell"); // Navigate to the sell page to create a new ad
+    router.push("/sell"); 
   };
 
   const handleDeleteAd = async (ad_id: number) => {
     try {
-      // Correct URL format to delete the ad using the ad_id in the URL path
       const response = await fetch(`http://127.0.0.1:8000/delete_ad/${ad_id}/`, {
         method: 'DELETE',
       });
   
       if (response.ok) {
-        setAds(ads.filter(ad => ad.ad_id !== ad_id)); // Remove the deleted ad from the state
+        setAds(ads.filter(ad => ad.ad_id !== ad_id)); 
       } else {
         alert('Failed to delete ad');
       }

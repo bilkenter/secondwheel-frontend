@@ -29,7 +29,6 @@ export default function ChatRoom({ carId, sellerId, currentUserId, carTitle }: C
 
   useEffect(() => {
     fetchMessages();
-    // Set up real-time updates
     const eventSource = new EventSource(`/api/chat/${carId}/stream`);
     
     eventSource.onmessage = (event) => {

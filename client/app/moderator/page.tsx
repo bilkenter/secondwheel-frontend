@@ -34,7 +34,6 @@ export default function ModeratorPage() {
   const [userToBan, setUserToBan] = useState<number | null>(null);
 
   useEffect(() => {
-    // Fetch ads and reports from the server
     const fetchData = async () => {
       try {
         const [adsResponse, reportsResponse, usersResponse] = await Promise.all([
@@ -63,13 +62,12 @@ export default function ModeratorPage() {
   }, []);
 
   const handleApproveReport = (reportId: number, adId: number, userId: number) => {
-    // Mark report as valid and delete the corresponding ad
     api(`/reports/${reportId}/approve`, { method: 'POST' })
       .then(response => {
         if (!response.ok) {
           throw new Error('Failed to approve report');
         }
-        setAds(prevAds => prevAds.filter(ad => ad.id !== adId)); // Remove ad
+        setAds(prevAds => prevAds.filter(ad => ad.id !== adId)); 
         setReports(prevReports => prevReports.map(report => 
           report.id === reportId ? { ...report, status: 'valid' } : report
         ));
@@ -78,7 +76,6 @@ export default function ModeratorPage() {
   };
 
   const handleRejectReport = (reportId: number) => {
-    // Mark report as invalid
     api(`/reports/${reportId}/reject`, { method: 'POST' })
       .then(response => {
         if (!response.ok) {
@@ -92,14 +89,12 @@ export default function ModeratorPage() {
   };
 
   const handleBanUser = (userId: number) => {
-    // Ban user
     api(`/users/${userId}/ban`, { method: 'POST' })
       .then(response => {
         if (!response.ok) {
           throw new Error('Failed to ban user');
         }
-        setIsModalOpen(false); // Close the modal
-        // Remove the user from the list
+        setIsModalOpen(false); 
         setReports(prevReports => prevReports.filter(report => report.userId !== userId));
         setUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
       })
