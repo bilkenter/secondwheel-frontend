@@ -67,6 +67,8 @@ export default function Home() {
 
   const handleCompare = () => {
     if (selectedVehicles.length === 2) {
+      console.log(selectedVehicles[0].ad_id, selectedVehicles[1].ad_id); // Check the ids
+
       router.push(`/compare?ad1=${selectedVehicles[0].ad_id}&ad2=${selectedVehicles[1].ad_id}`);
     }
   };

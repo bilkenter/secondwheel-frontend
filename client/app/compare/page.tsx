@@ -24,32 +24,52 @@ interface Car {
   bodyType: string;
   color: string;
   location: string;
+  image_urls: string[]
 }
-
 export default function ComparePage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [car1, setCar1] = useState<Car | null>(null);
-  const [car2, setCar2] = useState<Car | null>(null);
+  const [ad_id1, setad_id1] = useState<Car | null>(null);
+  const [ad_id2, setad_id2] = useState<Car | null>(null);
 
   useEffect(() => {
     const fetchCars = async () => {
       try {
-        const car1Id = searchParams.get('car1');
-        const car2Id = searchParams.get('car2');
+        const ad_id1Id = searchParams.get('ad1');
+        const ad_id2Id = searchParams.get('ad2');
 
-        if (!car1Id || !car2Id) {
-          router.push('/');
+        if (!ad_id1Id || !ad_id2Id) {
+          router.push('/');  // Redirect if no cars are selected
           return;
         }
 
-        const [car1Data, car2Data] = await Promise.all([
-          fetch(`/api/cars/${car1Id}`).then(res => res.json()),
-          fetch(`/api/cars/${car2Id}`).then(res => res.json())
+        const [ad_id1Data, ad_id2Data] = await Promise.all([
+          fetch(`http://127.0.0.1:8000/vehicle/${ad_id1Id}`).then(res => res.json()),
+          fetch(`http://127.0.0.1:8000/vehicle/${ad_id2Id}`).then(res => res.json())
         ]);
+        if (ad_id1Data && ad_id1Data.ad_id) {
+          setad_id1({
+            ...ad_id1Data,
+            image_urls: ad_id1Data.image_urls || [], // Handle image URLs if they exist
+          });
+        } else {
+          console.error("No vehicle data found for ad1.");
+        }
 
-        setCar1(car1Data);
-        setCar2(car2Data);
+        if (ad_id2Data && ad_id2Data.ad_id) {
+          setad_id2({
+            ...ad_id2Data,
+            image_urls: ad_id2Data.image_urls || [], // Handle image URLs if they exist
+          });
+        } else {
+          console.error("No vehicle data found for ad2.");
+        }
+
+        console.log('Car 1:', ad_id1Data); // Log ad_id1 data
+        console.log('Car 2:', ad_id2Data); // Log ad_id2 data
+
+        //setad_id1(ad_id1Data);
+        //setad_id2(ad_id2Data);
       } catch (error) {
         console.error('Error fetching cars:', error);
       }
@@ -58,7 +78,7 @@ export default function ComparePage() {
     fetchCars();
   }, [searchParams]);
 
-  if (!car1 || !car2) return <div>Loading...</div>;
+  if (!ad_id1 || !ad_id2) return <div>Loading...</div>;
 
   const comparisonFields = [
     { label: 'Vehicle Type', key: 'vehicleType' },
@@ -81,17 +101,17 @@ export default function ComparePage() {
       <Nav />
       <div className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-6 text-center">Vehicle Comparison</h1>
-        
+
         <div className="grid grid-cols-3 gap-4">
           {/* Car 1 */}
           <div>
-            <img src={car1.image} alt={car1.title} className="w-full h-48 object-cover rounded-lg mb-4" />
-            <Card>
+          <img src={ad_id1.image_urls[0] || 'https://via.placeholder.com/150'} alt={ad_id1.title} />
+          <Card>
               <CardContent className="p-4">
                 {comparisonFields.map(field => (
                   <div key={field.key} className="mb-2">
                     <p className="font-semibold">{field.label}</p>
-                    <p>{car1[field.key as keyof Car]}</p>
+                    <p>{ad_id1[field.key as keyof Car]}</p>
                   </div>
                 ))}
               </CardContent>
@@ -105,13 +125,13 @@ export default function ComparePage() {
 
           {/* Car 2 */}
           <div>
-            <img src={car2.image} alt={car2.title} className="w-full h-48 object-cover rounded-lg mb-4" />
-            <Card>
+          <img src={ad_id2.image_urls[0] || 'https://via.placeholder.com/150'} alt={ad_id2.title} />
+          <Card>
               <CardContent className="p-4">
                 {comparisonFields.map(field => (
                   <div key={field.key} className="mb-2">
                     <p className="font-semibold">{field.label}</p>
-                    <p>{car2[field.key as keyof Car]}</p>
+                    <p>{ad_id2[field.key as keyof Car]}</p>
                   </div>
                 ))}
               </CardContent>
@@ -125,4 +145,4 @@ export default function ComparePage() {
       </div>
     </main>
   );
-} 
+}
