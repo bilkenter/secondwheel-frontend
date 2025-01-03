@@ -36,6 +36,7 @@ export default function SellVehiclePage() {
     hasSlidingDoor: false,
   });
   const [image_urls, setImages] = useState<File[]>([]); // Image state if needed in the future
+  const [pdfFile, setPdfFile] = useState<File | null>(null); // State for PDF file upload
   const [userId, setUserId] = useState<number | null>(null); // User ID state
   const [userType, setUserType] = useState<string | null>(null); // User Type state
   const router = useRouter();
@@ -91,6 +92,13 @@ export default function SellVehiclePage() {
       setImages(Array.from(e.target.files)); // Store selected image files
     }
   };
+  // Separate function for handling PDF file changes (expert report)
+  const handlePdfFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setPdfFile(e.target.files[0]); // Store selected PDF file
+    }
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -161,6 +169,10 @@ export default function SellVehiclePage() {
     image_urls.forEach((image) => {
       formData.append('images', image);
     });
+    // Append the PDF file if exists
+    if (pdfFile) {
+      formData.append('pdf_file', pdfFile);
+    }
 
     try {
       const response = await fetch("http://127.0.0.1:8000/create_vehicle_ad/", {
@@ -338,6 +350,18 @@ export default function SellVehiclePage() {
                 className="w-full"
               />
             </div>
+
+            {/* Expert Report PDF Upload */}
+            <div>
+              <label>Upload Expert Report (PDF):</label>
+              <Input
+                type="file"
+                accept="application/pdf"
+                onChange={handlePdfFileChange}
+                className="w-full"
+              />
+            </div>
+            
             <Button type="submit">Post Your Ad</Button>
           </form>
         </CardContent>
