@@ -35,7 +35,7 @@ export default function SellVehiclePage() {
     cabinSpace: "",
     hasSlidingDoor: false,
   });
-  const [images, setImages] = useState<File[]>([]); // Image state if needed in the future
+  const [image_urls, setImages] = useState<File[]>([]); // Image state if needed in the future
   const [userId, setUserId] = useState<number | null>(null); // User ID state
   const [userType, setUserType] = useState<string | null>(null); // User Type state
   const router = useRouter();
@@ -82,6 +82,13 @@ export default function SellVehiclePage() {
       setAdditionalInfo((prev) => ({ ...prev, [name]: value }));
     } else {
       setVehicleInfo((prevState) => ({ ...prevState, [name]: value }));
+    }
+  };
+
+  // Separate function for handling file changes
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setImages(Array.from(e.target.files)); // Store selected image files
     }
   };
 
@@ -146,13 +153,22 @@ export default function SellVehiclePage() {
       vehicleData.hasSlidingDoor = additionalInfo.hasSlidingDoor;
     }
 
+    // Create a FormData object to send the vehicle data and images
+    const formData = new FormData();
+    formData.append('vehicle_data', JSON.stringify(vehicleData));
+
+    // Append images to formData
+    image_urls.forEach((image) => {
+      formData.append('images', image);
+    });
+
     try {
       const response = await fetch("http://127.0.0.1:8000/create_vehicle_ad/", {
-        method: "POST",
+        method: "POST",/* 
         headers: {
           "Content-Type": "application/json", // Ensure the Content-Type is application/json
-        },
-        body: JSON.stringify(vehicleData), // Send the vehicleData object as JSON
+        }, */
+        body: formData, // Send the vehicleData object as JSON
       });
 
       if (response.ok) {
@@ -163,6 +179,10 @@ export default function SellVehiclePage() {
         const errorData = await response.json();
         setAlertMessage(errorData.message || "An error occurred while posting the ad.");
       }
+      
+      const data = await response.json();
+      console.log("Data is: ", data);
+
     } catch (error) {
       console.error("Error submitting vehicle ad:", error);
       setAlertMessage("An unexpected error occurred. Please try again.");
@@ -307,6 +327,17 @@ export default function SellVehiclePage() {
                 </div>
               </>
             )}
+
+            {/* Image Upload */}
+            <div>
+              <label>Upload Images:</label>
+              <Input
+                type="file"
+                multiple
+                onChange={handleFileChange}
+                className="w-full"
+              />
+            </div>
             <Button type="submit">Post Your Ad</Button>
           </form>
         </CardContent>

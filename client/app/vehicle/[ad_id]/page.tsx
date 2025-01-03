@@ -37,7 +37,7 @@ interface Vehicle {
   status: string;
   seller_name: string; // Seller's name
   seller_email: string; // Seller's email address
-  images: string[];  // Keep the images property but don't use it yet
+  image_urls: string[];  // Keep the images property but don't use it yet
   user_id: number;
   title: string;
 }
@@ -79,83 +79,89 @@ export default function VehiclePage() {
   const [rating, setRating] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
 
-  //fetch real data
   useEffect(() => {
     const fetchAdData = async () => {
       try {
-        // Fetch ad details
         const response = await fetch(`http://127.0.0.1:8000/vehicle/${ad_id}/`);
-        console.log(ad_id);
-        const data = await response.json();
-        //setAd(adData);
-        // Fetch vehicle details
-        //const vehicleResponse = await fetch(`/api/vehicles/${adData.vehicle_id}`);
-        //const vehicleData = await vehicleResponse.json();
-        setVehicle(data);
 
-        // Fetch images for the ad
-        //const imagesResponse = await fetch(`/api/images/${id}`);
-        //const imagesData = await imagesResponse.json();
-        //setImages(imagesData);
+        // Check if the response is successful
+        if (!response.ok) {
+          console.error("Failed to fetch vehicle data, status:", response.status);
+          return;
+        }
+
+        const data = await response.json();
+        console.log("Fetched data:", data);  // Log the response data
+
+        // Check if vehicle data is returned as an object
+        if (data && data.ad_id) {
+          setVehicle({
+            ...data,
+            image_urls: data.image_urls || [], // Handle image URLs if they exist
+          });
+        } else {
+          console.error("No vehicle data found.");
+        }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching vehicle data:", error);
       }
     };
 
     fetchAdData();
   }, [ad_id]);
 
+
   //if (!vehicle) return <div>Loading...</div>;
 
-/*
-  // Mock data for testing
-  useEffect(() => {
-    const fetchMockData = () => {
-      // Mock Ad Data
-      const mockAd: Ad = {
-        ad_id: 1,
-        price: 25000,
-        location: "New York, NY",
-        description:
-          "Well-maintained 2020 Toyota Corolla, excellent condition.",
-        posting_date: "2023-12-10",
-        status: "Available",
-        seller_name: "Hermione Granger", // Adding seller name
-        seller_email: "hermione@example.com", // Adding seller email
+  /*
+    // Mock data for testing
+    useEffect(() => {
+      const fetchMockData = () => {
+        // Mock Ad Data
+        const mockAd: Ad = {
+          ad_id: 1,
+          price: 25000,
+          location: "New York, NY",
+          description:
+            "Well-maintained 2020 Toyota Corolla, excellent condition.",
+          posting_date: "2023-12-10",
+          status: "Available",
+          seller_name: "Hermione Granger", // Adding seller name
+          seller_email: "hermione@example.com", // Adding seller email
+        };
+  
+        // Mock Vehicle Data
+        const mockVehicle: Vehicle = {
+          vehicle_type: "Car",
+          vehicle_id: 1,
+          brand: "Toyota",
+          model_name: "Corolla",
+          year: 2020,
+          mileage: 12000,
+          motor_power: 132,
+          fuel_type: "Gasoline",
+          fuel_tank_capacity: 50,
+          transmission_type: "Automatic",
+          body_type: "Sedan",
+          color: "White",
+          number_of_doors: 4,
+        };
+  
+        // Mock Images Data
+        const images: Image[] = [
+          { image_id: 1, ad_id: 1, extension: "jpg", height: 500, width: 800 },
+          { image_id: 2, ad_id: 1, extension: "jpg", height: 500, width: 800 },
+        ];
+  
+        // Set the mock data
+        setAd(mockAd);
+        setVehicle(mockVehicle);
+        setImages(images);
       };
-
-      // Mock Vehicle Data
-      const mockVehicle: Vehicle = {
-        vehicle_type: "Car",
-        vehicle_id: 1,
-        brand: "Toyota",
-        model_name: "Corolla",
-        year: 2020,
-        mileage: 12000,
-        motor_power: 132,
-        fuel_type: "Gasoline",
-        fuel_tank_capacity: 50,
-        transmission_type: "Automatic",
-        body_type: "Sedan",
-        color: "White",
-        number_of_doors: 4,
-      };
-
-      // Mock Images Data
-      const images: Image[] = [
-        { image_id: 1, ad_id: 1, extension: "jpg", height: 500, width: 800 },
-        { image_id: 2, ad_id: 1, extension: "jpg", height: 500, width: 800 },
-      ];
-
-      // Set the mock data
-      setAd(mockAd);
-      setVehicle(mockVehicle);
-      setImages(images);
-    };
-
-    fetchMockData();
-  }, [ad_id]);
-*/
+  
+      fetchMockData();
+    }, [ad_id]);
+  */
   const handleMakeOfferClick = () => {
     setIsOfferModalOpen(true);
   };
@@ -167,7 +173,7 @@ export default function VehiclePage() {
   const handleReportAdClick = () => {
     setIsReportModalOpen(true);
   };
-  
+
   const handleGiveReviewClick = () => {
     setIsReviewModalOpen(true);
   };
@@ -189,26 +195,23 @@ export default function VehiclePage() {
     console.log("Report Reason:", reportReason);
     setIsReportModalOpen(false);
   };
-  
+
   const handleReviewSubmit = () => {
     console.log("Rating:", rating, "Comment:", reviewComment);
     setIsReviewModalOpen(false);
   };
 
   const handleNextImage = () => {
-    const images = vehicle?.images;
-    if (!images) return; // Exit if images is undefined
+    const images = vehicle?.image_urls;
+    if (!images) return;
     setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
   };
-  
+
   const handlePrevImage = () => {
-    const images = vehicle?.images;
-    if (!images) return; // Exit if images is undefined
-    setCurrentImageIndex(
-      (prevIndex) => (prevIndex - 1 + images.length) % images.length
-    );
+    const images = vehicle?.image_urls;
+    if (!images) return;
+    setCurrentImageIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
   };
-  
   if (!vehicle) return <div>Loading...</div>;
 
   //same here
@@ -223,25 +226,28 @@ export default function VehiclePage() {
         <div>
           {/* Placeholder for the image */}
           <div className="relative">
-              {/* Placeholder message instead of fetching images */}
+            {/* Display the first image from the image_urls */}
+            {vehicle?.image_urls && vehicle.image_urls.length > 0 ? (
+              <img
+                src={vehicle.image_urls[currentImageIndex]}
+                alt="Vehicle Image"
+                style={{
+                  width: "620px",
+                  height: "470px",
+                  border: "4px solid black",
+                  boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+                  borderRadius: "8px",
+                  marginTop: "85px",
+                  marginBottom: "24px",
+                  marginLeft: "170px",
+                }}
+              />
+            ) : (
               <p>No images available for this car at the moment.</p>
-            {/*
-            <img
-              src={`/images/${vehicle.images[currentImageIndex]?.image_id}.${vehicle.images[currentImageIndex]?.extension}`}
-              alt="Vehicle Image"
-              style={{
-                width: "620px",
-                height: "470px",
-                border: "4px solid black",
-                boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-                borderRadius: "8px",
-                marginTop: "85px",
-                marginBottom: "24px",
-                marginLeft: "170px",
-              }}
-            />
-            */}
-            {vehicle.images.length > 1 && (
+            )}
+
+            {/* Image Navigation Buttons */}
+            {vehicle?.image_urls.length > 1 && (
               <>
                 {/* Previous Image Button */}
                 <button
@@ -293,7 +299,7 @@ export default function VehiclePage() {
                 fontWeight: "500",
                 borderRadius: "20px",
               }}
-              disabled={vehicle.status.toLowerCase() === "sold"}
+              disabled={vehicle?.status?.toLowerCase() === "sold"}
               onClick={handleMakeOfferClick}
             >
               Make Offer
@@ -355,7 +361,7 @@ export default function VehiclePage() {
             marginLeft: "80px",
           }}
         >
-          {vehicle.status.toLowerCase() === "sold" && (
+          {vehicle?.status?.toLowerCase() === "sold" && (
             <img
               src="/icons/sold.svg"
               alt="Sold"
@@ -475,7 +481,7 @@ export default function VehiclePage() {
               <span
                 style={{
                   color:
-                  vehicle.status.toLowerCase() === "available" ? "green" : "red",
+                    vehicle?.status?.toLowerCase() === "available" ? "green" : "red",
                 }}
               >
                 {vehicle.status}
@@ -491,7 +497,7 @@ export default function VehiclePage() {
           isOpen={isChatOpen}
           onClose={() => setIsChatOpen(false)}
           carId={vehicle.ad_id.toString()}
-          sellerId={vehicle.user_id.toString()}
+          sellerId={vehicle.user_id?.toString()}
           currentUserId={localStorage.getItem("user_id") || ''}
           carTitle={vehicle.title}
         />

@@ -15,7 +15,7 @@ interface Vehicle {
   year: number;
   mileage: number;
   transmission: string;
-  image: string;
+  image_urls: string[]; // Change 'image' to 'image_urls' to handle multiple images
 }
 
 export default function Home() {
@@ -78,7 +78,10 @@ export default function Home() {
           },
         });
         const data = await response.json();
-        setVehicles(data.vehicles);
+        setVehicles(data.cars.map((car: any) => ({
+          ...car,
+          image: car.image_urls[0] ? `http://127.0.0.1:8000${car.image_urls[0]}` : "", // Prepend the base URL to the relative image URL
+        })));
       } catch (error) {
         console.error("Error fetching vehicles:", error);
       }
@@ -240,7 +243,13 @@ export default function Home() {
                     </div>
                   )}
                   <Card className="overflow-hidden">
-                    <img src={vehicle.image} alt={vehicle.title} className="w-full h-48 object-cover" />
+                    <img
+                      src={vehicle.image_urls.length > 0 ? vehicle.image_urls[0] : "https://via.placeholder.com/150"} // Use the image URLs stored in the database
+                      alt={vehicle.title}
+                      className="w-full h-48 object-cover"
+                      onError={(e) => e.currentTarget.src = "https://via.placeholder.com/150"} // Fallback image if error occurs
+                    />
+
                     <CardHeader>
                       <CardTitle>{vehicle.title}</CardTitle>
                     </CardHeader>
