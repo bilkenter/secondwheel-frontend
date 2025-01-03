@@ -12,6 +12,7 @@ interface Car {
   ad_id: number;
   title: string;
   price: number;
+  expert_report_url?: string;
 }
 
 interface User {
@@ -77,7 +78,7 @@ export default function BuyCarPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          carId: car.id,
+          carId: car.ad_id,
           price: car.price,
           userId: user.user_id,
         }),
@@ -100,6 +101,10 @@ export default function BuyCarPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const openExpertReport = (pdfUrl: string) => {
+    window.open(pdfUrl, '_blank');
   };
 
   if (!car || !user) return <div>Loading...</div>;
@@ -179,6 +184,15 @@ export default function BuyCarPage() {
                     Please add more credits to your account.
                   </AlertDescription>
                 </Alert>
+              )}
+
+              {car.expert_report_url && (
+                <Button 
+                  onClick={() => car.expert_report_url && openExpertReport(car.expert_report_url)}
+                  variant="outline"
+                >
+                  View Expert Report
+                </Button>
               )}
             </div>
           </CardContent>
