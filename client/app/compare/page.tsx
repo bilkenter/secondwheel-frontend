@@ -13,15 +13,14 @@ interface Car {
   price: number;
   year: number;
   mileage: number;
-  transmission: string;
-  image: string;
-  vehicleType: string;
+  transmission_type: string;
+  vehicle_type: string;
   brand: string;
-  modelName: string;
-  fuelType: string;
+  model_name: string;
+  fuel_type: string;
   fuelCapacity: string;
-  motorPower: string;
-  bodyType: string;
+  motor_power: string;
+  body_type: string;
   color: string;
   location: string;
   image_urls: string[]
@@ -81,16 +80,16 @@ export default function ComparePage() {
   if (!ad_id1 || !ad_id2) return <div>Loading...</div>;
 
   const comparisonFields = [
-    { label: 'Vehicle Type', key: 'vehicleType' },
+    { label: 'Vehicle Type', key: 'vehicle_type' },
     { label: 'Brand', key: 'brand' },
-    { label: 'Model Name', key: 'modelName' },
+    { label: 'Model Name', key: 'model_ame' },
     { label: 'Year', key: 'year' },
     { label: 'Mileage', key: 'mileage' },
-    { label: 'Fuel Type', key: 'fuelType' },
-    { label: 'Fuel Capacity', key: 'fuelCapacity' },
-    { label: 'Motor Power', key: 'motorPower' },
-    { label: 'Transmission', key: 'transmission' },
-    { label: 'Body Type', key: 'bodyType' },
+    { label: 'Fuel Type', key: 'fuel_type' },
+    { label: 'Fuel Capacity', key: 'fuel_capacity' },
+    { label: 'Motor Power', key: 'motor_power' },
+    { label: 'Transmission', key: 'transmission_type' },
+    { label: 'Body Type', key: 'body_type' },
     { label: 'Color', key: 'color' },
     { label: 'Location', key: 'location' },
     { label: 'Price', key: 'price' },
