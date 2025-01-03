@@ -40,7 +40,7 @@ interface Vehicle {
   image_urls: string[];  // Keep the images property but don't use it yet
   user_id: number;
   title: string;
-  pdf_file: string [];
+  pdf_file: string;
 }
 
 /*interface Ad {
