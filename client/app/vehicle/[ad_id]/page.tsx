@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useRouter } from 'next/navigation';
+import ChatModal from "@/components/Chat/ChatModal";
 import Nav from "@/components/ui/nav";
 
 interface Vehicle {
@@ -27,9 +29,20 @@ interface Vehicle {
   roof_height?: number; // Only for vans
   cabin_space?: number; // Only for vans
   has_sliding_door?: boolean; // Only for vans
+  ad_id: number;
+  price: number;
+  location: string;
+  description: string;
+  posting_date: string;
+  status: string;
+  seller_name: string; // Seller's name
+  seller_email: string; // Seller's email address
+  images: string[];  // Keep the images property but don't use it yet
+  user_id: number;
+  title: string;
 }
 
-interface Ad {
+/*interface Ad {
   ad_id: number;
   price: number;
   location: string;
@@ -47,48 +60,54 @@ interface Image {
   height: number;
   width: number;
 }
-
+*/
 export default function VehiclePage() {
-  const { id } = useParams(); // ad_id
-  const [ad, setAd] = useState<Ad | null>(null);
+  const { ad_id } = useParams(); // ad_id
+  //const [ad, setAd] = useState<Ad | null>(null);
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
-  const [images, setImages] = useState<Image[]>([]);
+  //const [images, setImages] = useState<Image[]>([]);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
   const [offerAmount, setOfferAmount] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isOfferPending, setIsOfferPending] = useState(false);
+  const router = useRouter();
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [rating, setRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
 
   //fetch real data
-
-  /*useEffect(() => {
+  useEffect(() => {
     const fetchAdData = async () => {
       try {
         // Fetch ad details
-        const adResponse = await fetch(`/api/ads/${id}`);
-        const adData = await adResponse.json();
-        setAd(adData);
-
+        const response = await fetch(`http://127.0.0.1:8000/vehicle/${ad_id}/`);
+        console.log(ad_id);
+        const data = await response.json();
+        //setAd(adData);
         // Fetch vehicle details
-        const vehicleResponse = await fetch(`/api/vehicles/${adData.vehicle_id}`);
-        const vehicleData = await vehicleResponse.json();
-        setVehicle(vehicleData);
+        //const vehicleResponse = await fetch(`/api/vehicles/${adData.vehicle_id}`);
+        //const vehicleData = await vehicleResponse.json();
+        setVehicle(data);
 
         // Fetch images for the ad
-        const imagesResponse = await fetch(`/api/images/${id}`);
-        const imagesData = await imagesResponse.json();
-        setImages(imagesData);
+        //const imagesResponse = await fetch(`/api/images/${id}`);
+        //const imagesData = await imagesResponse.json();
+        //setImages(imagesData);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
 
     fetchAdData();
-  }, [id]);
+  }, [ad_id]);
 
-  if (!ad || !vehicle) return <div>Loading...</div>;
-*/
+  //if (!vehicle) return <div>Loading...</div>;
 
+/*
   // Mock data for testing
   useEffect(() => {
     const fetchMockData = () => {
@@ -135,19 +154,29 @@ export default function VehiclePage() {
     };
 
     fetchMockData();
-  }, [id]);
-
+  }, [ad_id]);
+*/
   const handleMakeOfferClick = () => {
     setIsOfferModalOpen(true);
   };
 
   const handleContactSellerClick = () => {
-    setIsContactModalOpen(true);
+    setIsChatOpen(true);
+  };
+
+  const handleReportAdClick = () => {
+    setIsReportModalOpen(true);
+  };
+  
+  const handleGiveReviewClick = () => {
+    setIsReviewModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsContactModalOpen(false);
     setIsOfferModalOpen(false);
+    setIsReportModalOpen(false);
+    setIsReviewModalOpen(false)
   };
 
   const handleOfferSubmit = () => {
@@ -156,17 +185,31 @@ export default function VehiclePage() {
     setIsOfferPending(true);
   };
 
-  const handleNextImage = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+  const handleReportSubmit = () => {
+    console.log("Report Reason:", reportReason);
+    setIsReportModalOpen(false);
+  };
+  
+  const handleReviewSubmit = () => {
+    console.log("Rating:", rating, "Comment:", reviewComment);
+    setIsReviewModalOpen(false);
   };
 
+  const handleNextImage = () => {
+    const images = vehicle?.images;
+    if (!images) return; // Exit if images is undefined
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+  };
+  
   const handlePrevImage = () => {
+    const images = vehicle?.images;
+    if (!images) return; // Exit if images is undefined
     setCurrentImageIndex(
       (prevIndex) => (prevIndex - 1 + images.length) % images.length
     );
   };
-
-  if (!ad || !vehicle) return <div>Loading...</div>;
+  
+  if (!vehicle) return <div>Loading...</div>;
 
   //same here
   return (
@@ -180,8 +223,11 @@ export default function VehiclePage() {
         <div>
           {/* Placeholder for the image */}
           <div className="relative">
+              {/* Placeholder message instead of fetching images */}
+              <p>No images available for this car at the moment.</p>
+            {/*
             <img
-              src={`/images/${images[currentImageIndex]?.image_id}.${images[currentImageIndex]?.extension}`}
+              src={`/images/${vehicle.images[currentImageIndex]?.image_id}.${vehicle.images[currentImageIndex]?.extension}`}
               alt="Vehicle Image"
               style={{
                 width: "620px",
@@ -194,7 +240,8 @@ export default function VehiclePage() {
                 marginLeft: "170px",
               }}
             />
-            {images.length > 1 && (
+            */}
+            {vehicle.images.length > 1 && (
               <>
                 {/* Previous Image Button */}
                 <button
@@ -216,9 +263,9 @@ export default function VehiclePage() {
             )}
           </div>
           <div
-            className="flex gap-4"
+            className="grid grid-cols-2 gap-4"
             style={{
-              marginTop: "70px", // Added margin to move the buttons further down
+              marginTop: "50px",
               marginLeft: "190px",
             }}
           >
@@ -226,13 +273,13 @@ export default function VehiclePage() {
               style={{
                 backgroundColor: "#12314E",
                 color: "white",
-                width: "278px", // Set button width
-                height: "69px", // Set button height
-                fontSize: "20px", // Set larger font size
-                fontWeight: "500", // Optional: Make the text bold
+                width: "238px",
+                height: "55px",
+                fontSize: "18px",
+                fontWeight: "500",
                 borderRadius: "20px",
               }}
-              onClick={handleContactSellerClick} // Open contact seller modal
+              onClick={handleContactSellerClick} // Open chat
             >
               Contact Seller
             </Button>
@@ -240,20 +287,54 @@ export default function VehiclePage() {
               style={{
                 backgroundColor: "#12314E",
                 color: "white",
-                width: "278px", // Set button width
-                height: "69px", // Set button height
-                fontSize: "20px", // Set larger font size
-                fontWeight: "500", // Optional: Make the text bold
+                width: "238px",
+                height: "55px",
+                fontSize: "18px",
+                fontWeight: "500",
                 borderRadius: "20px",
               }}
-              disabled={ad.status.toLowerCase() === "sold"}
+              disabled={vehicle.status.toLowerCase() === "sold"}
               onClick={handleMakeOfferClick}
             >
               Make Offer
             </Button>
+            <Button
+              style={{
+                backgroundColor: "#12314E",
+                color: "white",
+                width: "238px",
+                height: "55px",
+                fontSize: "18px",
+                fontWeight: "500",
+                borderRadius: "20px",
+              }}
+              onClick={handleReportAdClick}
+            >
+              Report Ad
+            </Button>
+            <Button
+              style={{
+                backgroundColor: "#12314E",
+                color: "white",
+                width: "238px",
+                height: "55px",
+                fontSize: "18px",
+                fontWeight: "500",
+                borderRadius: "20px",
+              }}
+              onClick={handleGiveReviewClick}
+            >
+              Give Review
+            </Button>
+            {/* Offer Pending Message */}
             {isOfferPending && (
               <p
-                style={{ color: "red", fontStyle: "italic", marginTop: "10px" }}
+                style={{
+                  color: "red",
+                  fontStyle: "italic",
+                  marginTop: "10px",
+                  gridColumn: "span 2", //the message spans both columns
+                }}
               >
                 Your offer is pending approval!
               </p>
@@ -268,15 +349,15 @@ export default function VehiclePage() {
             backgroundColor: "#CDD2EF",
             border: "1px solid #12314E",
             boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-            width: "575px", // Set width to 575px
-            height: "705px", // Set height to 705px
+            width: "575px",
+            height: "705px",
             marginTop: "20px",
             marginLeft: "80px",
           }}
         >
-          {ad.status.toLowerCase() === "sold" && (
+          {vehicle.status.toLowerCase() === "sold" && (
             <img
-              src="/icons/sold.svg" // Replace with the actual path to your sold.svg file
+              src="/icons/sold.svg"
               alt="Sold"
               style={{
                 position: "absolute",
@@ -384,26 +465,39 @@ export default function VehiclePage() {
 
             <hr className="my-2 border-[#12314E]" />
             <p className="mb-2">
-              <strong>Location:</strong> {ad.location}
+              <strong>Location:</strong> {vehicle.location}
             </p>
             <p className="mb-2">
-              <strong>Price:</strong> ${ad.price.toLocaleString()}
+              <strong>Price:</strong> ${vehicle.price.toLocaleString()}
             </p>
             <p className="mb-2">
               <strong>Status:</strong>{" "}
               <span
                 style={{
                   color:
-                    ad.status.toLowerCase() === "available" ? "green" : "red",
+                  vehicle.status.toLowerCase() === "available" ? "green" : "red",
                 }}
               >
-                {ad.status}
+                {vehicle.status}
               </span>
             </p>
           </CardContent>
         </Card>
       </div>
-      {/* Contact Seller Modal */}
+
+      {/* Actual contact seller Modal */}
+      {vehicle && (
+        <ChatModal
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+          carId={vehicle.ad_id.toString()}
+          sellerId={vehicle.user_id.toString()}
+          currentUserId={localStorage.getItem("user_id") || ''}
+          carTitle={vehicle.title}
+        />
+      )}
+
+      {/* OLD Contact Seller Modal 
       {isContactModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div
@@ -414,14 +508,14 @@ export default function VehiclePage() {
               Contact Seller
             </h2>
             <div className="text-center">
-              <p className="mb-2">Seller Name: {ad.seller_name}</p>
+              <p className="mb-2">Seller Name: {vehicle.seller_name}</p>
               <p className="mb-4">
                 Email:{" "}
                 <a
-                  href={`mailto:${ad.seller_email}`}
+                  href={`mailto:${vehicle.seller_email}`}
                   className="text-[#12314E] underline"
                 >
-                  {ad.seller_email}
+                  {vehicle.seller_email}
                 </a>
               </p>
               <Button
@@ -441,6 +535,8 @@ export default function VehiclePage() {
           </div>
         </div>
       )}
+        */}
+
       {/* Modal for Making an Offer */}
       {isOfferModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -490,6 +586,49 @@ export default function VehiclePage() {
                   Cancel
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Report Ad Modal */}
+      {isReportModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Report Ad</h2>
+            <textarea
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              placeholder="Enter the reason for reporting this ad..."
+            />
+            <div className="modal-actions">
+              <Button onClick={handleReportSubmit}>Submit</Button>
+              <Button onClick={handleCloseModal}>Cancel</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Give Review Modal */}
+      {isReviewModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Give Review</h2>
+            <input
+              type="number"
+              value={rating}
+              min={0}
+              max={5}
+              onChange={(e) => setRating(Number(e.target.value))}
+              placeholder="Rate out of 5"
+            />
+            <textarea
+              value={reviewComment}
+              onChange={(e) => setReviewComment(e.target.value)}
+              placeholder="Write your review..."
+            />
+            <div className="modal-actions">
+              <Button onClick={handleReviewSubmit}>Submit</Button>
+              <Button onClick={handleCloseModal}>Cancel</Button>
             </div>
           </div>
         </div>

@@ -7,7 +7,7 @@ import Nav from "@/components/ui/nav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 
-interface Car {
+interface Vehicle {
   ad_id: number;  // changed to ad_id
   title: string;
   description: string;
@@ -20,7 +20,7 @@ interface Car {
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [cars, setCars] = useState<Car[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [minPrice, setMinPrice] = useState<string>('');
   const [maxPrice, setMaxPrice] = useState<string>('');
   const [priceError, setPriceError] = useState<string>('');
@@ -29,7 +29,7 @@ export default function Home() {
   const [maxMileage, setMaxMileage] = useState<string>('');
   const [yearError, setYearError] = useState<string>('');
   const [comparingMode, setComparingMode] = useState(false);
-  const [selectedCars, setSelectedCars] = useState<Car[]>([]);
+  const [selectedVehicles, setSelectedVehicles] = useState<Vehicle[]>([]);
   const router = useRouter();
 
   const validatePriceRange = (min: string, max: string) => {
@@ -48,28 +48,28 @@ export default function Home() {
     }
   };
 
-  const handleCarSelect = (car: Car) => {
+  const handleVehicleSelect = (vehicle: Vehicle) => {
     if (!comparingMode) return;
 
-    setSelectedCars(prev => {
-      if (prev.find(c => c.ad_id === car.ad_id)) {
-        return prev.filter(c => c.ad_id !== car.ad_id);
+    setSelectedVehicles(prev => {
+      if (prev.find(c => c.ad_id === vehicle.ad_id)) {
+        return prev.filter(c => c.ad_id !== vehicle.ad_id);
       }
       if (prev.length >= 2) {
         return prev;
       }
-      return [...prev, car];
+      return [...prev, vehicle];
     });
   };
 
   const handleCompare = () => {
-    if (selectedCars.length === 2) {
-      router.push(`/compare?ad1=${selectedCars[0].ad_id}&ad2=${selectedCars[1].ad_id}`);
+    if (selectedVehicles.length === 2) {
+      router.push(`/compare?ad1=${selectedVehicles[0].ad_id}&ad2=${selectedVehicles[1].ad_id}`);
     }
   };
 
   useEffect(() => {
-    const fetchCars = async () => {
+    const fetchVehicles = async () => {
       try {
         const response = await fetch("http://127.0.0.1:8000/get_all_cars/", {
           method: "GET",
@@ -78,13 +78,13 @@ export default function Home() {
           },
         });
         const data = await response.json();
-        setCars(data.cars);
+        setVehicles(data.vehicles);
       } catch (error) {
-        console.error("Error fetching cars:", error);
+        console.error("Error fetching vehicles:", error);
       }
     };
 
-    fetchCars();
+    fetchVehicles();
   }, []);
   return (
     <main className="flex flex-col min-h-screen">
@@ -204,7 +204,7 @@ export default function Home() {
             <Button
               onClick={() => {
                 setComparingMode(!comparingMode);
-                setSelectedCars([]);
+                setSelectedVehicles([]);
               }}
               variant={comparingMode ? "destructive" : "default"}
             >
@@ -213,46 +213,46 @@ export default function Home() {
             {comparingMode && (
               <Button
                 onClick={handleCompare}
-                disabled={selectedCars.length !== 2}
+                disabled={selectedVehicles.length !== 2}
                 className="ml-2"
               >
-                Compare Selected ({selectedCars.length}/2)
+                Compare Selected ({selectedVehicles.length}/2)
               </Button>
             )}
           </div>
 
           {/* Car listings */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {cars.length > 0 ? (
-              cars.map((car) => (
+            {vehicles.length > 0 ? (
+              vehicles.map((vehicle) => (
                 <div
-                  key={car.ad_id}
-                  onClick={() => comparingMode ? handleCarSelect(car) : router.push(`/car/${car.ad_id}`)} // Use ad_id here for routing
+                  key={vehicle.ad_id}
+                  onClick={() => comparingMode ? handleVehicleSelect(vehicle) : router.push(`/vehicle/${vehicle.ad_id}`)} // Use ad_id here for routing
 
-                  className={`cursor-pointer transition-transform hover:scale-105 relative ${comparingMode && selectedCars.find(c => c.ad_id === car.ad_id)
+                  className={`cursor-pointer transition-transform hover:scale-105 relative ${comparingMode && selectedVehicles.find(c => c.ad_id === vehicle.ad_id)
                     ? 'ring-2 ring-blue-500'
                     : ''
                     }`}
                 >
-                  {comparingMode && selectedCars.find(c => c.ad_id === car.ad_id) && (
+                  {comparingMode && selectedVehicles.find(c => c.ad_id === vehicle.ad_id) && (
                     <div className="absolute top-2 right-2 z-10 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
                       ✓
                     </div>
                   )}
                   <Card className="overflow-hidden">
-                    <img src={car.image} alt={car.title} className="w-full h-48 object-cover" />
+                    <img src={vehicle.image} alt={vehicle.title} className="w-full h-48 object-cover" />
                     <CardHeader>
-                      <CardTitle>{car.title}</CardTitle>
+                      <CardTitle>{vehicle.title}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-gray-600 mb-2">{car.description}</p>
+                      <p className="text-sm text-gray-600 mb-2">{vehicle.description}</p>
                       <div className="flex justify-between items-center">
-                        <p className="font-bold text-lg">${car.price.toLocaleString()}</p>
-                        <span className="text-sm text-gray-500">{car.year}</span>
+                        <p className="font-bold text-lg">${vehicle.price.toLocaleString()}</p>
+                        <span className="text-sm text-gray-500">{vehicle.year}</span>
                       </div>
                       <div className="mt-2 text-sm text-gray-600">
-                        <span className="mr-4">{car.mileage.toLocaleString()} miles</span>
-                        <span>{car.transmission}</span>
+                        <span className="mr-4">{vehicle.mileage.toLocaleString()} miles</span>
+                        <span>{vehicle.transmission}</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -260,7 +260,7 @@ export default function Home() {
               ))
             ) : (
               <div className="col-span-3 text-center text-gray-500">
-                No cars found that match the filters.
+                No vehicles found that match the filters.
               </div>
             )}
           </div>
