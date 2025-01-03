@@ -12,6 +12,7 @@ interface Vehicle {
   title: string;
   description: string;
   price: number;
+  brand: string;
   year: number;
   mileage: number;
   transmission: string;
@@ -30,6 +31,8 @@ export default function Home() {
   const [yearError, setYearError] = useState<string>('');
   const [comparingMode, setComparingMode] = useState(false);
   const [selectedVehicles, setSelectedVehicles] = useState<Vehicle[]>([]);
+  const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([]);
+  const [selectedBrand, setSelectedBrand] = useState<string>(''); // Added selectedBrand state
   const router = useRouter();
 
   const validatePriceRange = (min: string, max: string) => {
@@ -68,6 +71,29 @@ export default function Home() {
     }
   };
 
+  // Function to filter vehicles based on selected filters
+  const filterVehicles = () => {
+    const filtered = vehicles.filter(vehicle => {
+      const matchesPrice =
+        (minPrice ? vehicle.price >= Number(minPrice) : true) &&
+        (maxPrice ? vehicle.price <= Number(maxPrice) : true);
+      const matchesYear =
+        (yearFrom ? vehicle.year >= Number(yearFrom) : true) &&
+        (yearTo ? vehicle.year <= Number(yearTo) : true);
+      const matchesMileage =
+        maxMileage ? vehicle.mileage <= Number(maxMileage) : true;
+      const matchesBrand =
+        selectedBrand ? vehicle.brand.toLowerCase() === selectedBrand.toLowerCase() : true; // Check for selected brand
+
+      const matchesSearch =
+        searchTerm ? vehicle.title.toLowerCase().includes(searchTerm.toLowerCase()) : true;
+
+      return matchesPrice && matchesYear && matchesMileage && matchesSearch && matchesBrand;
+    });
+
+    setFilteredVehicles(filtered);
+  };
+
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
@@ -77,11 +103,15 @@ export default function Home() {
             "Content-Type": "application/json",
           },
         });
+
         const data = await response.json();
-        setVehicles(data.cars.map((car: any) => ({
+        const vehiclesData = data.cars.map((car: any) => ({
           ...car,
           image: car.image_urls[0] ? `http://127.0.0.1:8000${car.image_urls[0]}` : "", // Prepend the base URL to the relative image URL
-        })));
+        }));
+
+        setVehicles(vehiclesData);
+        setFilteredVehicles(vehiclesData); // Initially show all vehicles
       } catch (error) {
         console.error("Error fetching vehicles:", error);
       }
@@ -89,6 +119,13 @@ export default function Home() {
 
     fetchVehicles();
   }, []);
+
+  // Re-filter the vehicles whenever a filter changes
+  useEffect(() => {
+    filterVehicles();
+  }, [minPrice, maxPrice, yearFrom, yearTo, maxMileage, searchTerm, selectedBrand]);
+
+  
   return (
     <main className="flex flex-col min-h-screen">
       <Nav />
@@ -98,7 +135,12 @@ export default function Home() {
           <div className="space-y-4">
             <div>
               <label htmlFor="brand" className="block mb-2">Brand</label>
-              <select id="brand" className="w-full p-2 border rounded">
+              <select
+                id="brand"
+                className="w-full p-2 border rounded"
+                value={selectedBrand}
+                onChange={(e) => setSelectedBrand(e.target.value)} // Handle brand filter change
+              >
                 <option value="">All Brands</option>
                 <option value="toyota">Toyota</option>
                 <option value="honda">Honda</option>
@@ -192,7 +234,7 @@ export default function Home() {
                 className="w-full"
               />
             </div>
-            <Button className="w-full">Apply Filters</Button>
+            <Button className="w-full" onClick={filterVehicles}>Apply Filters</Button>
           </div>
         </aside>
         <div className="flex-1 p-8">
@@ -226,8 +268,8 @@ export default function Home() {
 
           {/* Car listings */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {vehicles.length > 0 ? (
-              vehicles.map((vehicle) => (
+            {filteredVehicles.length > 0 ? (
+              filteredVehicles.map((vehicle) => (
                 <div
                   key={vehicle.ad_id}
                   onClick={() => comparingMode ? handleVehicleSelect(vehicle) : router.push(`/vehicle/${vehicle.ad_id}`)} // Use ad_id here for routing
@@ -249,7 +291,6 @@ export default function Home() {
                       className="w-full h-48 object-cover"
                       onError={(e) => e.currentTarget.src = "https://via.placeholder.com/150"} // Fallback image if error occurs
                     />
-
                     <CardHeader>
                       <CardTitle>{vehicle.title}</CardTitle>
                     </CardHeader>
