@@ -186,10 +186,44 @@ export default function VehiclePage() {
     setIsReviewModalOpen(false)
   };
 
-  const handleOfferSubmit = () => {
-    console.log("Offer submitted:", offerAmount);
-    setIsOfferModalOpen(false); // Close the offer modal after submitting
-    setIsOfferPending(true);
+  const handleOfferSubmit = async () => {
+    // Validate offerAmount
+    if (!offerAmount || parseFloat(offerAmount) <= 0) {
+      alert("Please enter a valid offer amount.");
+      return;
+    }
+
+    try {
+      // Create the request payload
+      const offerData = {
+        ad_id: vehicle?.ad_id,
+        offered_price: parseFloat(offerAmount),
+        user_id: localStorage.getItem("user_id"),  // Get the current user ID (this should be saved in local storage)
+      };
+
+      // Send POST request to make an offer
+      const response = await fetch("http://127.0.0.1:8000/make_offer/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(offerData),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Offer made successfully:", result);
+        setIsOfferPending(true);  // Set offer pending state
+        setIsOfferModalOpen(false);  // Close the offer modal
+      } else {
+        const error = await response.json();
+        console.error("Failed to make an offer:", error);
+        alert(error.error);
+      }
+    } catch (error) {
+      console.error("Error making an offer:", error);
+      alert("Error making an offer. Please try again.");
+    }
   };
 
   const handleReportSubmit = () => {
@@ -424,51 +458,46 @@ export default function VehiclePage() {
             </p>
 
             {/* Conditional fields based on vehicle type */}
-            {vehicle.vehicle_type === "Car" && vehicle.number_of_doors && (
+            {vehicle?.vehicle_type === "Car" && vehicle?.number_of_doors && (
               <p className="mb-2">
                 <strong>Number of Doors:</strong> {vehicle.number_of_doors}
               </p>
             )}
-            {vehicle.vehicle_type === "Motorcycle" && vehicle.wheel_number && (
+            {vehicle?.vehicle_type === "Motorcycle" && vehicle?.wheel_number && (
               <p className="mb-2">
                 <strong>Wheel Number:</strong> {vehicle.wheel_number}
               </p>
             )}
-            {vehicle.vehicle_type === "Motorcycle" &&
-              vehicle.cylinder_volume && (
-                <p className="mb-2">
-                  <strong>Cylinder Volume:</strong> {vehicle.cylinder_volume} cc
-                </p>
-              )}
-            {vehicle.vehicle_type === "Motorcycle" &&
-              vehicle.has_basket !== undefined && (
-                <p className="mb-2">
-                  <strong>Has Basket:</strong>{" "}
-                  {vehicle.has_basket ? "Yes" : "No"}
-                </p>
-              )}
-            {vehicle.vehicle_type === "Van" && vehicle.seat_number && (
+            {vehicle?.vehicle_type === "Motorcycle" && vehicle?.cylinder_volume && (
+              <p className="mb-2">
+                <strong>Cylinder Volume:</strong> {vehicle.cylinder_volume} cc
+              </p>
+            )}
+            {vehicle?.vehicle_type === "Motorcycle" && vehicle?.has_basket !== undefined && (
+              <p className="mb-2">
+                <strong>Has Basket:</strong> {vehicle.has_basket ? "Yes" : "No"}
+              </p>
+            )}
+            {vehicle?.vehicle_type === "Van" && vehicle?.seat_number && (
               <p className="mb-2">
                 <strong>Seat Number:</strong> {vehicle.seat_number}
               </p>
             )}
-            {vehicle.vehicle_type === "Van" && vehicle.roof_height && (
+            {vehicle?.vehicle_type === "Van" && vehicle?.roof_height && (
               <p className="mb-2">
                 <strong>Roof Height:</strong> {vehicle.roof_height} cm
               </p>
             )}
-            {vehicle.vehicle_type === "Van" && vehicle.cabin_space && (
+            {vehicle?.vehicle_type === "Van" && vehicle?.cabin_space && (
               <p className="mb-2">
                 <strong>Cabin Space:</strong> {vehicle.cabin_space} m²
               </p>
             )}
-            {vehicle.vehicle_type === "Van" &&
-              vehicle.has_sliding_door !== undefined && (
-                <p className="mb-2">
-                  <strong>Has Sliding Door:</strong>{" "}
-                  {vehicle.has_sliding_door ? "Yes" : "No"}
-                </p>
-              )}
+            {vehicle?.vehicle_type === "Van" && vehicle?.has_sliding_door !== undefined && (
+              <p className="mb-2">
+                <strong>Has Sliding Door:</strong> {vehicle.has_sliding_door ? "Yes" : "No"}
+              </p>
+            )}
 
             <hr className="my-2 border-[#12314E]" />
             <p className="mb-2">

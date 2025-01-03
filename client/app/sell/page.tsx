@@ -114,10 +114,10 @@ export default function SellVehiclePage() {
 
     if (
       Object.values(vehicleInfo).some((value) => value === "") ||
-      (vehicleInfo.vehicle_type === "car" && !additionalInfo.numOfDoors) ||
-      (vehicleInfo.vehicle_type === "motorcycle" &&
+      (vehicleInfo.vehicle_type === "Car" && !additionalInfo.numOfDoors) ||
+      (vehicleInfo.vehicle_type === "Motorcycle" &&
         (!additionalInfo.wheelNumber || !additionalInfo.cylinderVolume)) ||
-      (vehicleInfo.vehicle_type === "van" &&
+      (vehicleInfo.vehicle_type === "Van" &&
         (!additionalInfo.seatNumber || !additionalInfo.roofHeight || !additionalInfo.cabinSpace))
     ) {
       setAlertMessage("Please fill in all fields.");
@@ -148,13 +148,13 @@ export default function SellVehiclePage() {
     };
 
     // Add additional info based on vehicle type
-    if (vehicleInfo.vehicle_type === "car") {
+    if (vehicleInfo.vehicle_type === "Car") {
       vehicleData.numOfDoors = additionalInfo.numOfDoors;
-    } else if (vehicleInfo.vehicle_type === "motorcycle") {
+    } else if (vehicleInfo.vehicle_type === "Motorcycle") {
       vehicleData.wheelNumber = additionalInfo.wheelNumber;
       vehicleData.cylinderVolume = additionalInfo.cylinderVolume;
       vehicleData.hasBasket = additionalInfo.hasBasket;
-    } else if (vehicleInfo.vehicle_type === "van") {
+    } else if (vehicleInfo.vehicle_type === "Van") {
       vehicleData.seatNumber = additionalInfo.seatNumber;
       vehicleData.roofHeight = additionalInfo.roofHeight;
       vehicleData.cabinSpace = additionalInfo.cabinSpace;
@@ -222,9 +222,9 @@ export default function SellVehiclePage() {
                 <option value="" disabled>
                   Select Vehicle Type
                 </option>
-                <option value="car">Car</option>
-                <option value="motorcycle">Motorcycle</option>
-                <option value="van">Van</option>
+                <option value="Car">Car</option>
+                <option value="Motorcycle">Motorcycle</option>
+                <option value="Van">Van</option>
               </select>
             </div>
             {[ 
@@ -255,7 +255,7 @@ export default function SellVehiclePage() {
             </div>
 
             {/* Additional Fields */}
-            {vehicleInfo.vehicle_type === "car" && (
+            {vehicleInfo.vehicle_type === "Car" && (
               <div>
                 <Input
                   type="number"
@@ -267,7 +267,7 @@ export default function SellVehiclePage() {
                 />
               </div>
             )}
-            {vehicleInfo.vehicle_type === "motorcycle" && (
+            {vehicleInfo.vehicle_type === "Motorcycle" && (
               <>
                 <Input
                   type="number"
@@ -299,7 +299,7 @@ export default function SellVehiclePage() {
                 </div>
               </>
             )}
-            {vehicleInfo.vehicle_type === "van" && (
+            {vehicleInfo.vehicle_type === "Van" && (
               <>
                 <Input
                   type="number"
@@ -361,7 +361,7 @@ export default function SellVehiclePage() {
                 className="w-full"
               />
             </div>
-            
+
             <Button type="submit">Post Your Ad</Button>
           </form>
         </CardContent>

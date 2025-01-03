@@ -12,12 +12,14 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
+import { Alert } from "@/components/ui/alert";
+
 interface Offer {
   id: number;
-  vehicle: string;
-  buyer: string;
-  amount: number;
-  date: string;
+  vehicle_id: string;
+  buyer_id: string;
+  offered_price: number;
+  offer_date: string;
   status: "pending" | "accepted" | "rejected";
 }
 
@@ -30,8 +32,9 @@ interface Transaction {
 }
 
 interface User {
-  type: "buyer" | "seller";
+  user_type: "Buyer" | "Seller" | "Moderator" | "Admin" | "Unknown";
   name: string;
+  user_id: number;
 }
 
 export default function OfferManagement() {
@@ -42,29 +45,46 @@ export default function OfferManagement() {
   const [action, setAction] = useState<"accepted" | "rejected" | null>(null);
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [user, setUser] = useState<User | null>(null);
-
+  const [userId, setUserId] = useState<number | null>(null); // Track user ID
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
   useEffect(() => {
-    fetchOffers();
-    fetchUserType();
-  }, []);
+    if (typeof window !== "undefined") {
+      const storedUserId = localStorage.getItem("user_id");
+      console.log("Stored user ID:", storedUserId); // Check stored userId
+      if (storedUserId) {
+        // Directly use the storedUserId to fetch the user data
+        const parsedUserId = parseInt(storedUserId, 10);
+        fetchUserData(parsedUserId); // Call fetchUserData with parsedUserId
+      } else {
+        setAlertMessage("User is not logged in.");
+      }
+    }
+  }, []); // Empty dependency array, so this effect runs once after the initial render
 
-  const fetchOffers = async () => {
+  const fetchUserData = async (user_id: number) => {
     try {
-      const response = await fetch("/api/offers");
+      const response = await fetch(`http://127.0.0.1:8000/get_user_data?user_id=${user_id}`);
       const data = await response.json();
-      setOffers(data.offers);
+      console.log("User data:", data); // Log fetched user data
+      if (data.user) {
+        setUser(data.user); // Set user data from the API response
+        if (data.user.user_type === "Seller") {
+          fetchOffers(user_id); // Fetch offers if the user is a seller
+        }
+      }
     } catch (error) {
-      console.error("Error fetching offers:", error);
+      console.error("Error fetching user data:", error);
     }
   };
-
-  const fetchUserType = async () => {
+  // Fetch offers for a seller using the seller_id
+  const fetchOffers = async (seller_id: number) => {
     try {
-      const response = await fetch("/api/user"); // Adjust API endpoint as needed
+      const response = await fetch(`http://127.0.0.1:8000/get_incoming_offers?seller_id=${seller_id}`);
       const data = await response.json();
-      setUser(data.user);
+      console.log("Offers fetched:", data);
+      setOffers(data.offers || []); // Store the fetched offers in the state
     } catch (error) {
-      console.error("Error fetching user type:", error);
+      console.error("Error fetching offers:", error);
     }
   };
 
@@ -87,18 +107,16 @@ export default function OfferManagement() {
       });
 
       if (response.ok) {
-        // Mock transaction data for demo purposes
         const mockTransaction: Transaction = {
           transactionId: `TXN-${selectedOffer.id}-${Date.now()}`,
-          buyerName: selectedOffer.buyer,
+          buyerName: selectedOffer.buyer_id,
           sellerName: user?.name || "Unknown Seller",
           transactionDate: new Date().toLocaleString(),
-          offerPrice: selectedOffer.amount,
+          offerPrice: selectedOffer.offered_price,
         };
 
         setTransaction(mockTransaction);
 
-        // Update local state
         setOffers((prevOffers) =>
           prevOffers.map((offer) =>
             offer.id === selectedOffer.id
@@ -118,6 +136,7 @@ export default function OfferManagement() {
     setAction(null);
   };
 
+ 
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Offer Management</h1>
@@ -127,14 +146,14 @@ export default function OfferManagement() {
           <Card key={offer.id} className="p-6">
             <div className="flex justify-between items-center">
               <div className="space-y-2">
-                <div className="font-medium">Vehicle: {offer.vehicle}</div>
-                <div>Buyer: {offer.buyer}</div>
-                <div>Offer Amount: ${offer.amount.toLocaleString()}</div>
-                <div>Offer Date: {offer.date}</div>
+                <div className="font-medium">Vehicle: {offer.vehicle_id}</div>
+                <div>Buyer: {offer.buyer_id}</div>
+                <div>Offer Amount: ${offer.offered_price}</div>
+                <div>Offer Date: {offer.offer_date}</div>
                 <div>Status: {offer.status}</div>
               </div>
 
-              {user?.type === "seller" && offer.status === "pending" && (
+              {user?.user_type === "Seller" && offer.status === "pending" && (
                 <div className="space-x-2">
                   <Button
                     onClick={() => handleAction(offer, "accepted")}
@@ -191,7 +210,7 @@ export default function OfferManagement() {
               <div>Buyer Name: {transaction.buyerName}</div>
               <div>Seller Name: {transaction.sellerName}</div>
               <div>Transaction Date: {transaction.transactionDate}</div>
-              <div>Offer Price: ${transaction.offerPrice.toLocaleString()}</div>
+              <div>Offer Price: ${transaction.offerPrice}</div>
             </div>
           )}
           <DialogFooter>
